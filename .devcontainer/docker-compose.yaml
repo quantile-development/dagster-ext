@@ -1,0 +1,13 @@
+services:
+  vscode:
+    build:
+      context: .
+      dockerfile: vscode.Dockerfile
+    tty: true
+    volumes:
+      - ..:/workspace:cached
+      - pip-cache:/root/.cache/pip
+
+volumes:
+  postgres:
+  pip-cache:

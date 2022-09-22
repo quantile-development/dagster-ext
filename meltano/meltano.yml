@@ -1,0 +1,51 @@
+version: 1
+default_environment: dev
+project_id: meltano-b849cd48-8429-42dd-9ee2-1240ff73438f
+plugins:
+  utilities:
+    - name: dagster
+      namespace: dagster
+      pip_url: -e .. dbt-snowflake
+      executable: dagster_invoker
+      commands:
+        initialize:
+          executable: dagster_extension
+          args: initialize
+        up:
+          executable: dagit_invoker
+          args: -f $MELTANO_PROJECT_ROOT/orchestrate/repository.py
+      #   invoke:
+      #     executable: airflow_extension
+      #     args: invoke
+      # settings:
+      #   - name: core.dags_folder
+      #     label: DAGs Folder
+      #     value: $MELTANO_PROJECT_ROOT/orchestrate/dags
+      #     env: AIRFLOW__CORE__DAGS_FOLDER
+      #   - name: core.plugins_folder
+      #     label: Plugins Folder
+      #     value: $MELTANO_PROJECT_ROOT/orchestrate/plugins
+      #     env: AIRFLOW__CORE__PLUGINS_FOLDER
+      #   - name: core.load_examples
+      #     label: Load Examples
+      #     value: false
+      #     env: AIRFLOW__CORE__LOAD_EXAMPLES
+      #   - name: core.dags_are_paused_at_creation
+      #     label: Pause DAGs at Creation
+      #     env: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
+      #     value: false
+      #   - name: database.sql_alchemy_conn
+      #     label: SQL Alchemy Connection
+      #     value: sqlite:///$MELTANO_PROJECT_ROOT/airflow/airflow.db
+      #     env: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+      #   - name: webserver.web_server_port
+      #     label: Webserver Port
+      #     value: 8080
+      #     env: AIRFLOW__WEBSERVER__WEB_SERVER_PORT
+      # config:
+      #   home: $MELTANO_PROJECT_ROOT/airflow
+      #   config: $MELTANO_PROJECT_ROOT/airflow/airflow.cfg
+environments:
+  - name: dev
+  - name: staging
+  - name: prod
