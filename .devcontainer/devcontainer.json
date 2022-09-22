@@ -41,6 +41,7 @@
     "python.linting.pylintEnabled": true,
     "python.linting.lintOnSave": true,
     "python.linting.pylintArgs": ["--rcfile", "${workspaceFolder}/.pylintrc"],
+    "python.analysis.extraPaths": ["/workspace"],
     "python.sortImports.args": ["--profile", "black"],
     "[python]": {
       "editor.codeActionsOnSave": {

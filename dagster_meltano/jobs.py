@@ -21,16 +21,14 @@ def load_jobs_from_meltano_project(
         List[Union[JobDefinition, ScheduleDefinition]]: Returns a list of either Dagster JobDefinitions or ScheduleDefinitions
     """
     meltano_resource = MeltanoResource(project_dir)
+    meltano_jobs = meltano_resource.jobs
 
-    list_result = subprocess.run(
-        [meltano_resource.meltano_bin, "schedule", "list", "--format=json"],
-        cwd=meltano_resource.project_dir,
-        stdout=subprocess.PIPE,
-        universal_newlines=True,
-        check=True,
-    )
-
-    schedule_export = json.loads(list_result.stdout)
-    logging.info(schedule_export)
+    return list(meltano_jobs)
+    logging.error("------------")
+    logging.error(meltano_resource.schedules)
 
     return []
+
+
+if __name__ == "__main__":
+    load_jobs_from_meltano_project("/workspace/meltano")

@@ -5,7 +5,7 @@ plugins:
   utilities:
     - name: dagster
       namespace: dagster
-      pip_url: -e .. dbt-postgres
+      pip_url: -e /workspace dbt-postgres
       executable: dagster_invoker
       commands:
         initialize:
@@ -17,11 +17,11 @@ plugins:
       #   invoke:
       #     executable: airflow_extension
       #     args: invoke
-      # settings:
-      #   - name: core.dags_folder
-      #     label: DAGs Folder
-      #     value: $MELTANO_PROJECT_ROOT/orchestrate/dags
-      #     env: AIRFLOW__CORE__DAGS_FOLDER
+      settings:
+        - name: dagster_home
+          label: The home folder of Dagster
+          value: $MELTANO_PROJECT_ROOT/.meltano
+          env: DAGSTER_HOME
       #   - name: core.plugins_folder
       #     label: Plugins Folder
       #     value: $MELTANO_PROJECT_ROOT/orchestrate/plugins

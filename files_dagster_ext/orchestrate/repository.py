@@ -6,31 +6,17 @@ import subprocess
 from dagster import job, op, repository, with_resources
 from dagster._utils import file_relative_path
 from dagster_dbt import dbt_cli_resource
-
-# from dagster_meltano import (
-#     load_assets_from_meltano_project,
-#     load_jobs_from_meltano_project,
-#     meltano_resource,
-# )
 from dagster_meltano.jobs import load_jobs_from_meltano_project
 
 MELTANO_PROJECT_ROOT = os.getenv("MELTANO_PROJECT_ROOT", os.getcwd())
 MELTANO_BIN = os.getenv("MELTANO_BIN", "meltano")
 
-
-@op
-def hello():
-    print("world")
-
-
-@job
-def hello_job():
-    hello()
+meltano_jobs = load_jobs_from_meltano_project(MELTANO_PROJECT_ROOT)
 
 
 @repository
 def repository():
-    return [load_jobs_from_meltano_project(MELTANO_PROJECT_ROOT)]
+    return [meltano_jobs]
 
 
 # MELTANO_PROJECT_DIR = file_relative_path(
