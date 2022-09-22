@@ -5,7 +5,7 @@ plugins:
   utilities:
     - name: dagster
       namespace: dagster
-      pip_url: -e .. dbt-snowflake
+      pip_url: -e .. dbt-postgres
       executable: dagster_invoker
       commands:
         initialize:
@@ -13,7 +13,7 @@ plugins:
           args: initialize
         up:
           executable: dagit_invoker
-          args: -f $MELTANO_PROJECT_ROOT/orchestrate/repository.py
+          args: -f /workspace/files_dagster_ext/orchestrate/repository.py
       #   invoke:
       #     executable: airflow_extension
       #     args: invoke
@@ -45,6 +45,20 @@ plugins:
       # config:
       #   home: $MELTANO_PROJECT_ROOT/airflow
       #   config: $MELTANO_PROJECT_ROOT/airflow/airflow.cfg
+
+jobs:
+  - name: job-with-schedule
+    tasks:
+      - tap-csv target-postgres
+  - name: job-without-schedule
+    tasks:
+      - tap-csv target-postgres
+
+schedules:
+  - name: schedule
+    job: job-with-schedule
+    interval: "@daily"
+
 environments:
   - name: dev
   - name: staging

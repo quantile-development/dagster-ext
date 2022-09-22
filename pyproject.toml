@@ -9,8 +9,9 @@ license = "Apache 2.0"
 python = "<3.11,>=3.8"
 click = "^8.1.3"
 typer = "^0.6.1"
-dagit = "^1.0.9"
-dagster-meltano = {git = "https://github.com/quantile-development/dagster-meltano.git", rev="development"}
+dagit = ">=1.0,<1.1"
+dagster = ">=1.0,<1.1"
+dagster-dbt = ">=0.16,<0.17"
 "meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
 
 [tool.poetry.dev-dependencies]
@@ -18,12 +19,16 @@ black = "^22.3.0"
 isort = "^5.10.1"
 flake8 = "^3.9.0"
 
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.15.3"
+
 [build-system]
 requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"
 
 packages = [
     { include = "dagster_ext" },
+    { include = "dagster_meltano" },
     { include = "files_dagster-ext.*" }
 ]
 
