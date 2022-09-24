@@ -16,6 +16,23 @@
         "close": true
       },
       "problemMatcher": []
+    },
+    {
+      "label": "publish",
+      "type": "shell",
+      "command": "poetry",
+      "args": [
+        "publish",
+        "--build",
+        "--skip-existing",
+        "--username",
+        "$PYPI_USERNAME",
+        "--password",
+        "$PYPI_PASSWORD"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      }
     }
   ]
 }

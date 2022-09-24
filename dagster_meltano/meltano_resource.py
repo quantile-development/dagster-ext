@@ -1,11 +1,11 @@
 import json
 import logging
+import os
 import subprocess
 from functools import lru_cache
 from typing import Dict, List, Optional
 
-import dagster
-from dagster import In, Nothing, get_dagster_logger, job, op
+from dagster import In, Nothing, get_dagster_logger, job, op, resource
 
 from dagster_meltano.job import Job
 from dagster_meltano.meltano_invoker import MeltanoInvoker
@@ -16,7 +16,7 @@ logger = get_dagster_logger()
 
 
 class MeltanoResource(metaclass=Singleton):
-    def __init__(self, project_dir: str, meltano_bin: Optional[str] = "meltano"):
+    def __init__(self, project_dir: str = None, meltano_bin: Optional[str] = "meltano"):
         self.project_dir = project_dir
         self.meltano_bin = meltano_bin
         self.meltano_invoker = MeltanoInvoker(
@@ -29,7 +29,7 @@ class MeltanoResource(metaclass=Singleton):
         return json.loads(
             subprocess.run(
                 [self.meltano_bin] + commands,
-                cwd=self.project_dir,
+                cwd=self.project_dir or os.getcwd(),
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
                 check=True,
@@ -63,21 +63,12 @@ class MeltanoResource(metaclass=Singleton):
             if meltano_job.name in self.meltano_job_schedules:
                 yield self.meltano_job_schedules[meltano_job.name].dagster_schedule
 
-            # @job(name=generate_dagster_name(meltano_job["job_name"]))
-            # def dagster_job():
-            #     meltano_task_done = None
-            #     for task in meltano_job["tasks"]:
-            #         meltano_task_op = self.create_meltano_task_op(task)
-            #         if meltano_task_done:
-            #             meltano_task_done = meltano_task_op(meltano_task_done)
-            #         else:
-            #             meltano_task_done = meltano_task_op()
 
-            # yield dagster_job
-
-    # @property
-    # def schedules(self) -> List[dict]:
-    #     return self.run_cli(["schedule", "list", "--format=json"])
+@resource(description="A resource that corresponds to a Meltano project.")
+def meltano_resource(init_context):
+    # project_dir = init_context.resource_config["project_dir"]
+    # return MeltanoResource(project_dir)
+    return MeltanoResource()
 
 
 if __name__ == "__main__":

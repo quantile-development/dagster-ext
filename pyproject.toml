@@ -4,6 +4,14 @@ version = "0.0.1"
 description = "`dagster-ext` is a Meltano utility extension."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"
+packages = [
+    { include = "dagster_ext" },
+    { include = "dagster_meltano" },
+    { include = "files_dagster_ext" }
+]
+include = [
+   "files_dagster_ext"
+]
 
 [tool.poetry.dependencies]
 python = "<3.11,>=3.8"
@@ -26,15 +34,8 @@ pylint = "^2.15.3"
 requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"
 
-packages = [
-    { include = "dagster_ext" },
-    { include = "dagster_meltano" },
-    { include = "files_dagster-ext.*" }
-]
-
-include = [
-   "files_dagster-ext/repository.py"
-]
+[project.urls]
+Homepage = "https://github.com/JulesHuisman/dagster-ext"
 
 [tool.poetry.scripts]
 dagster_extension = 'dagster_ext.main:app'

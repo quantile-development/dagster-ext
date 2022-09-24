@@ -7,6 +7,8 @@ services:
     volumes:
       - ..:/workspace:cached
       - pip-cache:/root/.cache/pip
+    env_file:
+      - .env
 
   postgres:
     image: postgres:14
