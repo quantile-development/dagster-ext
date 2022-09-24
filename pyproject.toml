@@ -13,6 +13,8 @@ dagit = ">=1.0,<1.1"
 dagster = ">=1.0,<1.1"
 dagster-dbt = ">=0.16,<0.17"
 "meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
+cookiecutter = "^2.1.1"
+rich = "^12.5.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"

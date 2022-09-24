@@ -7,57 +7,41 @@ plugins:
       namespace: dagster
       pip_url: -e /workspace dbt-postgres
       executable: dagster_invoker
-      commands:
-        initialize:
-          executable: dagster_extension
-          args: initialize
-        up:
-          executable: dagit_invoker
-          args: -f /workspace/files_dagster_ext/orchestrate/repository.py
-      #   invoke:
-      #     executable: airflow_extension
-      #     args: invoke
       settings:
         - name: dagster_home
-          label: The home folder of Dagster
-          value: $MELTANO_PROJECT_ROOT/.meltano
           env: DAGSTER_HOME
-      #   - name: core.plugins_folder
-      #     label: Plugins Folder
-      #     value: $MELTANO_PROJECT_ROOT/orchestrate/plugins
-      #     env: AIRFLOW__CORE__PLUGINS_FOLDER
-      #   - name: core.load_examples
-      #     label: Load Examples
-      #     value: false
-      #     env: AIRFLOW__CORE__LOAD_EXAMPLES
-      #   - name: core.dags_are_paused_at_creation
-      #     label: Pause DAGs at Creation
-      #     env: AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION
-      #     value: false
-      #   - name: database.sql_alchemy_conn
-      #     label: SQL Alchemy Connection
-      #     value: sqlite:///$MELTANO_PROJECT_ROOT/airflow/airflow.db
-      #     env: AIRFLOW__CORE__SQL_ALCHEMY_CONN
-      #   - name: webserver.web_server_port
-      #     label: Webserver Port
-      #     value: 8080
-      #     env: AIRFLOW__WEBSERVER__WEB_SERVER_PORT
-      # config:
-      #   home: $MELTANO_PROJECT_ROOT/airflow
-      #   config: $MELTANO_PROJECT_ROOT/airflow/airflow.cfg
-
+          value: $MELTANO_PROJECT_ROOT/.meltano
+          label: The home folder of Dagster
+        - name: repository_dir
+          env: REPOSITORY_DIR
+          value: $MELTANO_PROJECT_ROOT/orchestrate
+          label: The root folder of the dagster project
+      commands:
+        initialize:
+          args: initialize
+          executable: dagster_extension
+        init:
+          args: initialize
+          executable: dagster_extension
+        up:
+          args: -f $REPOSITORY_DIR/repository.py
+          executable: dagit_invoker
+      config:
+        repository_dir: $MELTANO_PROJECT_ROOT/orchestrate
 jobs:
   - name: job-with-schedule
     tasks:
-      - tap-csv target-postgres
+      - tap-csv target-jsonl
   - name: job-without-schedule
     tasks:
       - tap-csv target-postgres
+      - tap-csv target-snowflake
 
 schedules:
   - name: schedule
-    job: job-with-schedule
     interval: "@daily"
+
+    job: job-with-schedule
 
 environments:
   - name: dev
