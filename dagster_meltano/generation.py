@@ -24,10 +24,6 @@ def load_jobs_from_meltano_project(
     meltano_jobs = meltano_resource.jobs
 
     return list(meltano_jobs)
-    logging.error("------------")
-    logging.error(meltano_resource.schedules)
-
-    return []
 
 
 if __name__ == "__main__":

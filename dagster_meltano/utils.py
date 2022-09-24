@@ -1,3 +1,8 @@
+import json
+import subprocess
+from typing import List
+
+
 class Singleton(type):
     _instances = {}
 
@@ -19,3 +24,16 @@ def generate_dbt_group_name(node_info):
         return "_".join(node_info["fqn"][1:-1])
 
     return "dbt"
+
+
+# TODO: Refactor to different file
+def run_cli(commands: List[str], project_dir: str, meltano_bin: str = "meltano"):
+    return json.loads(
+        subprocess.run(
+            [meltano_bin] + commands,
+            cwd=project_dir,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+            check=True,
+        ).stdout
+    )
