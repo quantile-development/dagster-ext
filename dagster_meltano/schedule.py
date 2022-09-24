@@ -20,6 +20,7 @@ class Schedule:
     @property
     def dagster_schedule(self) -> ScheduleDefinition:
         return ScheduleDefinition(
+            name=self.dagster_name,
             job_name=self.dagster_job_name,
             cron_schedule=self.cron_interval,
             default_status=DefaultScheduleStatus.RUNNING,

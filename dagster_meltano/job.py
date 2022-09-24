@@ -15,7 +15,12 @@ class Job:
         return generate_dagster_name(self.name)
 
     def task_op_factory(self, task: str):
-        @op(name=generate_dagster_name(task), ins={"after": In(Nothing)})
+        @op(
+            name=generate_dagster_name(task),
+            description=f"Run `{task}` using Meltano.",
+            ins={"after": In(Nothing)},
+            tags={"kind": "meltano"},
+        )
         def dagster_op():
             self.meltano_invoker.run_and_log(f"run {task}")
 
