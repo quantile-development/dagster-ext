@@ -2,6 +2,39 @@ version: 1
 default_environment: dev
 project_id: meltano-b849cd48-8429-42dd-9ee2-1240ff73438f
 plugins:
+  extractors:
+    - name: tap-csv
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+      config:
+        files:
+          - entity: sample_one
+            path: extract/sample.csv
+            keys: [id]
+          - entity: sample_two
+            path: extract/sample.csv
+            keys: [id]
+
+    - name: tap-github
+      variant: singer-io
+      pip_url: tap-github
+      select:
+        - "issues.*"
+      config:
+        repository: quantile-development/dagster-meltano
+        start_date: 2021-01-01
+        access_token: $TAP_GITHUB_ACCESS_TOKEN
+
+  loaders:
+    - name: target-postgres
+      variant: transferwise
+      pip_url: pipelinewise-target-postgres
+      config:
+        dbname: postgres
+        user: postgres
+        password: postgres
+        host: postgres
+
   utilities:
     - name: dagster
       namespace: dagster
@@ -31,16 +64,15 @@ plugins:
 jobs:
   - name: job-with-schedule
     tasks:
-      - tap-csv target-jsonl
+      - tap-csv target-postgres
   - name: job-without-schedule
     tasks:
-      - tap-csv target-postgres
+      - tap-csv target-jsonl
       - tap-csv target-snowflake
 
 schedules:
   - name: schedule
     interval: "@daily"
-
     job: job-with-schedule
 
 environments:

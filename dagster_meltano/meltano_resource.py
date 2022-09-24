@@ -19,7 +19,10 @@ class MeltanoResource(metaclass=Singleton):
     def __init__(self, project_dir: str, meltano_bin: Optional[str] = "meltano"):
         self.project_dir = project_dir
         self.meltano_bin = meltano_bin
-        self.meltano_invoker = MeltanoInvoker(meltano_bin)
+        self.meltano_invoker = MeltanoInvoker(
+            meltano_bin,
+            log_level="info",  # TODO: Get this from the resource config
+        )
 
     # TODO: Refactor to different file
     def run_cli(self, commands: List[str]):

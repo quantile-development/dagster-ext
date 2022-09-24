@@ -50,7 +50,7 @@ class Dagster(ExtensionBase):
         Find the location of the files extention.
         This houses the cookiecutter project.
         """
-        return files_dagster_ext.__path__._path[0]
+        return Path(files_dagster_ext.__path__._path[0]) / "dagster"
 
     def initialize(self, force: bool = False) -> None:
 

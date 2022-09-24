@@ -1,11 +1,15 @@
 import asyncio
+import json
 import os
 import subprocess
+from pathlib import Path
 from typing import IO, Any, Optional, Union
 
 import structlog
+from dagster import get_dagster_logger
 
-log = structlog.get_logger()
+# log = structlog.get_logger()
+log = get_dagster_logger()
 
 
 class MeltanoInvoker:
@@ -15,7 +19,8 @@ class MeltanoInvoker:
         self,
         bin: str = "meltano",
         cwd: str = None,
-        env: Optional[dict[str, any]] = None,
+        log_level: str = "info",
+        env: Optional[dict[str, any]] = {},
     ) -> None:
         """Minimal invoker for running subprocesses.
 
@@ -26,16 +31,21 @@ class MeltanoInvoker:
         """
         self.bin = bin
         self.cwd = cwd
-        self.popen_env = env if env else os.environ.copy()
+        self.env = {
+            **os.environ.copy(),
+            "MELTANO_CLI_LOG_CONFIG": Path(__file__).parent / "logging.yaml",
+            "MELTANO_CLI_LOG_LEVEL": log_level,
+            **env,
+        }
 
     def run(
         self,
         *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
         stdout: Union[None, int, IO] = subprocess.PIPE,
-        stderr: Union[None, int, IO] = subprocess.PIPE,
+        stderr: Union[None, int, IO] = subprocess.STDOUT,
         text: bool = True,
         **kwargs: Any,
-    ) -> subprocess.CompletedProcess:
+    ) -> subprocess.Popen:
         """Run a subprocess. Simple wrapper around subprocess.run.
 
         Note that output from stdout and stderr is NOT logged automatically. Especially
@@ -62,13 +72,12 @@ class MeltanoInvoker:
         Returns:
             The completed process.
         """
-        return subprocess.run(
+        return subprocess.Popen(
             [self.bin, *args],
             cwd=self.cwd,
-            env=self.popen_env,
+            env=self.env,
             stdout=stdout,
             stderr=stderr,
-            check=True,
             text=text,
             **kwargs,
         )
@@ -80,11 +89,26 @@ class MeltanoInvoker:
         Args:
             reader: The stream reader to read from.
         """
+        # TODO: Clean up the logging
         while True:
             if reader.at_eof():
                 break
             data = await reader.readline()
-            log.info(data.decode("utf-8").rstrip())
+            log_line_raw = data.decode("utf-8").rstrip()
+
+            if not log_line_raw:
+                continue
+
+            try:
+                log_line = json.loads(log_line_raw)
+
+                if log_line.get("level") == "debug":
+                    log.debug(log_line.get("event", log_line))
+                else:
+                    log.info(log_line.get("event", log_line))
+            except json.decoder.JSONDecodeError:
+                log.info(log_line_raw)
+
             await asyncio.sleep(0)
 
     async def _exec(
@@ -104,7 +128,7 @@ class MeltanoInvoker:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=self.cwd,
-            env=self.popen_env,
+            env=self.env,
         )
 
         results = await asyncio.gather(

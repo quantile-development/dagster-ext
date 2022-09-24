@@ -1,4 +1,12 @@
-from dagster import In, JobDefinition, Nothing, OpDefinition, job, op
+from dagster import (
+    In,
+    JobDefinition,
+    Nothing,
+    OpDefinition,
+    OpExecutionContext,
+    job,
+    op,
+)
 
 from dagster_meltano.meltano_invoker import MeltanoInvoker
 from dagster_meltano.utils import generate_dagster_name, run_cli
@@ -21,8 +29,15 @@ class Job:
             ins={"after": In(Nothing)},
             tags={"kind": "meltano"},
         )
-        def dagster_op():
-            self.meltano_invoker.run_and_log(f"run {task}")
+        def dagster_op(context: OpExecutionContext):
+            # logger = context.log
+            # meltano_process = self.meltano_invoker.run("run", task.split())
+            # for line in iter(meltano_process.stdout.readline, b""):
+            #     logger.info(line)
+
+            self.meltano_invoker.run_and_log("run", task.split())
+            # self.meltano_invoker.bin = "printenv"
+            # self.meltano_invoker.run_and_log()
 
         return dagster_op
 
