@@ -3,7 +3,7 @@ import json
 import os
 import subprocess
 from pathlib import Path
-from typing import IO, Any, Optional, Union
+from typing import IO, Any, Callable, List, Optional, Tuple, Union
 
 import structlog
 from dagster import get_dagster_logger
@@ -82,47 +82,77 @@ class MeltanoInvoker:
             **kwargs,
         )
 
-    @staticmethod
-    async def _log_stdio(reader: asyncio.streams.StreamReader) -> None:
-        """Log the output of a stream.
+    # @staticmethod
+    # async def _log_stdio(reader: asyncio.streams.StreamReader) -> None:
+    #     """Log the output of a stream.
 
+    #     Args:
+    #         reader: The stream reader to read from.
+    #     """
+    #     # TODO: Clean up the logging
+    #     while True:
+    #         if reader.at_eof():
+    #             break
+    #         data = await reader.readline()
+    #         log_line_raw = data.decode("utf-8").rstrip()
+
+    #         if not log_line_raw:
+    #             continue
+
+    #         try:
+    #             log_line = json.loads(log_line_raw)
+
+    #             if log_line.get("level") == "debug":
+    #                 log.debug(log_line.get("event", log_line))
+    #             else:
+    #                 log.info(log_line.get("event", log_line))
+    #         except json.decoder.JSONDecodeError:
+    #             log.info(log_line_raw)
+
+    #         await asyncio.sleep(0)
+
+    @staticmethod
+    async def _log_stdio(reader: asyncio.streams.StreamReader, log_type: str) -> None:
+        """Log the output of a stream.
         Args:
             reader: The stream reader to read from.
         """
-        # TODO: Clean up the logging
         while True:
             if reader.at_eof():
                 break
             data = await reader.readline()
-            log_line_raw = data.decode("utf-8").rstrip()
-
-            if not log_line_raw:
-                continue
-
-            try:
-                log_line = json.loads(log_line_raw)
-
-                if log_line.get("level") == "debug":
-                    log.debug(log_line.get("event", log_line))
-                else:
-                    log.info(log_line.get("event", log_line))
-            except json.decoder.JSONDecodeError:
-                log.info(log_line_raw)
-
+            log.info(data.decode("utf-8").rstrip())
             await asyncio.sleep(0)
 
-    async def _exec(
+    @staticmethod
+    async def log_processor_json(reader: asyncio.streams.StreamReader, log_type: str) -> dict:
+        if log_type != "stdout":
+            return
+
+        lines = b""
+
+        while True:
+            if reader.at_eof():
+                break
+
+            line = await reader.readline()
+            lines += line
+
+        return json.loads(lines)
+
+    async def exec(
         self,
         sub_command: Union[str, None] = None,
+        log_processor: Optional[Callable] = None,
         *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
-    ) -> asyncio.subprocess.Process:
+    ) -> Tuple[asyncio.subprocess.Process, List[any]]:
         popen_args = []
         if sub_command:
             popen_args.append(sub_command)
         if args:
             popen_args.extend(*args)
 
-        p = await asyncio.create_subprocess_exec(
+        process = await asyncio.create_subprocess_exec(
             self.bin,
             *popen_args,
             stdout=asyncio.subprocess.PIPE,
@@ -131,22 +161,25 @@ class MeltanoInvoker:
             env=self.env,
         )
 
-        results = await asyncio.gather(
-            asyncio.create_task(self._log_stdio(p.stderr)),
-            asyncio.create_task(self._log_stdio(p.stdout)),
+        log_processor_function = log_processor or self._log_stdio
+
+        logs = await asyncio.gather(
+            asyncio.create_task(log_processor_function(process.stderr, log_type="stderr")),
+            asyncio.create_task(log_processor_function(process.stdout, log_type="stdout")),
             return_exceptions=True,
         )
 
-        for r in results:  # raise first exception if any
-            if isinstance(r, Exception):
-                raise r
+        for log in logs:  # raise first exception if any
+            if isinstance(log, Exception):
+                raise log
 
-        await p.wait()
-        return p
+        await process.wait()
+        return process, logs
 
     def run_and_log(
         self,
         sub_command: Union[str, None] = None,
+        log_processor: Optional[Callable] = None,
         *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
     ) -> None:
         """Run a subprocess and stream the output to the logger.
@@ -156,11 +189,12 @@ class MeltanoInvoker:
 
         Args:
             sub_command: The subcommand to run.
+            log_processor: Gets called for each log line that is being processed.
             *args: The arguments to pass to the subprocess.
 
         Raises:
             CalledProcessError: If the subprocess failed.
         """
-        result = asyncio.run(self._exec(sub_command, *args))
-        if result.returncode:
-            raise subprocess.CalledProcessError(result.returncode, cmd=self.bin, stderr=None)
+        process, logs = asyncio.run(self.exec(sub_command, log_processor, *args))
+        if process.returncode:
+            raise subprocess.CalledProcessError(process.returncode, cmd=self.bin, stderr=None)

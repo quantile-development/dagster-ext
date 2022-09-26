@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 import os
@@ -13,6 +14,7 @@ from dagster_meltano.schedule import Schedule
 from dagster_meltano.utils import Singleton, generate_dagster_name
 
 logger = get_dagster_logger()
+STDOUT = 1
 
 
 class MeltanoResource(metaclass=Singleton):
@@ -24,30 +26,37 @@ class MeltanoResource(metaclass=Singleton):
             log_level="info",  # TODO: Get this from the resource config
         )
 
-    # TODO: Refactor to different file
-    def run_cli(self, commands: List[str]):
-        return json.loads(
-            subprocess.run(
-                [self.meltano_bin] + commands,
-                cwd=self.project_dir or os.getcwd(),
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-                check=True,
-            ).stdout
+    async def load_json_from_cli(self, command: List[str]) -> dict:
+        _, logs = await self.meltano_invoker.exec(
+            None,
+            self.meltano_invoker.log_processor_json,
+            command,
         )
+        return logs[STDOUT]
+
+    async def gather_meltano_yaml_information(self):
+        jobs, schedules = await asyncio.gather(
+            self.load_json_from_cli(["job", "list", "--format=json"]),
+            self.load_json_from_cli(["schedule", "list", "--format=json"]),
+        )
+        return jobs, schedules
+
+    @property
+    @lru_cache
+    def meltano_yaml(self):
+        jobs, schedules = asyncio.run(self.gather_meltano_yaml_information())
+        return {"jobs": jobs["jobs"], "schedules": schedules["schedules"]}
 
     @property
     @lru_cache
     def meltano_jobs(self) -> List[Job]:
-        meltano_job_list = self.run_cli(["job", "list", "--format=json"])
-        meltano_job_list = meltano_job_list["jobs"]
+        meltano_job_list = self.meltano_yaml["jobs"]
         return [Job(meltano_job, self.meltano_invoker) for meltano_job in meltano_job_list]
 
     @property
     @lru_cache
     def meltano_schedules(self) -> List[Schedule]:
-        meltano_schedule_list = self.run_cli(["schedule", "list", "--format=json"])
-        meltano_schedule_list = meltano_schedule_list["schedules"]["job"]
+        meltano_schedule_list = self.meltano_yaml["schedules"]["job"]
         schedule_list = [Schedule(meltano_schedule) for meltano_schedule in meltano_schedule_list]
         return schedule_list
 
@@ -73,4 +82,4 @@ def meltano_resource(init_context):
 
 if __name__ == "__main__":
     meltano_resource = MeltanoResource("/workspace/meltano")
-    print(meltano_resource)
+    print(meltano_resource.meltano_yaml)

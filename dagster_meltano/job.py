@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import asyncio
+import json
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -9,6 +11,7 @@ from dagster import (
     Nothing,
     OpDefinition,
     OpExecutionContext,
+    get_dagster_logger,
     job,
     op,
 )
@@ -18,6 +21,37 @@ from dagster_meltano.utils import generate_dagster_name, run_cli
 
 if TYPE_CHECKING:
     from dagster_meltano.meltano_resource import MeltanoResource
+
+dagster_logger = get_dagster_logger()
+
+
+async def log_processor(reader: asyncio.streams.StreamReader, log_type: str) -> None:
+    """Log the output of a stream.
+
+    Args:
+        reader: The stream reader to read from.
+    """
+    # TODO: Clean up the logging
+    while True:
+        if reader.at_eof():
+            break
+        data = await reader.readline()
+        log_line_raw = data.decode("utf-8").rstrip()
+
+        if not log_line_raw:
+            continue
+
+        try:
+            log_line = json.loads(log_line_raw)
+
+            if log_line.get("level") == "debug":
+                dagster_logger.debug(log_line.get("event", log_line))
+            else:
+                dagster_logger.info(log_line.get("event", log_line))
+        except json.decoder.JSONDecodeError:
+            dagster_logger.info(log_line_raw)
+
+        await asyncio.sleep(0)
 
 
 @lru_cache
@@ -36,7 +70,11 @@ def task_op_factory(task: str) -> OpDefinition:
     )
     def dagster_op(context: OpExecutionContext):
         meltano_resource: MeltanoResource = context.resources.meltano
-        meltano_resource.meltano_invoker.run_and_log("run", task.split())
+        meltano_resource.meltano_invoker.run_and_log(
+            "run",
+            log_processor,
+            task.split(),
+        )
 
     return dagster_op
 
