@@ -7,6 +7,8 @@ services:
     volumes:
       - ..:/workspace:cached
       - pip-cache:/root/.cache/pip
+    environment:
+      MELTANO_PROJECT_ROOT: /workspace/meltano
     env_file:
       - .env
 

@@ -1,13 +1,14 @@
 [tool.poetry]
 name = "dagster-ext"
-version = "0.0.1"
+version = "0.0.1a1"
 description = "`dagster-ext` is a Meltano utility extension."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"
 packages = [
     { include = "dagster_ext" },
     { include = "dagster_meltano" },
-    { include = "files_dagster_ext" }
+    { include = "files_dagster_ext" },
+    { include = "meltano" }
 ]
 include = [
    "files_dagster_ext"
@@ -20,7 +21,7 @@ typer = "^0.6.1"
 dagit = ">=1.0,<1.1"
 dagster = ">=1.0,<1.1"
 dagster-dbt = ">=0.16,<0.17"
-"meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
+# "meltano.edk" = {git = "https://github.com/meltano/edk.git", rev="main"}
 cookiecutter = "^2.1.1"
 rich = "^12.5.1"
 
