@@ -88,7 +88,7 @@ class Dagster(ExtensionBase):
                 choices=["postgres", "snowflake", "bigquery", "redshift"],
             )
             print(
-                "[blue]Make sure you define the DBT environment variable in the Dagster utility.[/blue]"
+                "[blue]Make sure you define the DBT environment variables in the Dagster utility.[/blue]"
             )
         else:
             dbt_plugin = None
