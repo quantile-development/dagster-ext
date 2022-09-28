@@ -1,6 +1,5 @@
 {
     "project_name": "orchestrate",
-    "_copy_without_render": [
-        ".github/workflows/*.yaml"
-    ]
+    "install_github_actions": false,
+    "dbt_plugin": null
 }

@@ -35,6 +35,7 @@ class MeltanoInvoker:
             **os.environ.copy(),
             "MELTANO_CLI_LOG_CONFIG": Path(__file__).parent / "logging.yaml",
             "MELTANO_CLI_LOG_LEVEL": log_level,
+            "DBT_USE_COLORS": "false",
             **env,
         }
 
@@ -81,35 +82,6 @@ class MeltanoInvoker:
             text=text,
             **kwargs,
         )
-
-    # @staticmethod
-    # async def _log_stdio(reader: asyncio.streams.StreamReader) -> None:
-    #     """Log the output of a stream.
-
-    #     Args:
-    #         reader: The stream reader to read from.
-    #     """
-    #     # TODO: Clean up the logging
-    #     while True:
-    #         if reader.at_eof():
-    #             break
-    #         data = await reader.readline()
-    #         log_line_raw = data.decode("utf-8").rstrip()
-
-    #         if not log_line_raw:
-    #             continue
-
-    #         try:
-    #             log_line = json.loads(log_line_raw)
-
-    #             if log_line.get("level") == "debug":
-    #                 log.debug(log_line.get("event", log_line))
-    #             else:
-    #                 log.info(log_line.get("event", log_line))
-    #         except json.decoder.JSONDecodeError:
-    #             log.info(log_line_raw)
-
-    #         await asyncio.sleep(0)
 
     @staticmethod
     async def _log_stdio(reader: asyncio.streams.StreamReader, log_type: str) -> None:

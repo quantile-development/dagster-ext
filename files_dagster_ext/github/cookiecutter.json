@@ -1,0 +1,5 @@
+{
+    "_copy_without_render": [
+        ".github/workflows/*.yaml"
+    ]
+}

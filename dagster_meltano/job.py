@@ -17,7 +17,7 @@ from dagster import (
 )
 
 from dagster_meltano.meltano_invoker import MeltanoInvoker
-from dagster_meltano.utils import generate_dagster_name, run_cli
+from dagster_meltano.utils import generate_dagster_name
 
 if TYPE_CHECKING:
     from dagster_meltano.meltano_resource import MeltanoResource

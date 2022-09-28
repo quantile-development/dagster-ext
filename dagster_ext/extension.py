@@ -53,7 +53,7 @@ class Dagster(ExtensionBase):
         return Path(files_dagster_ext.__path__._path[0]) / "dagster"
 
     def initialize(self, force: bool = False) -> None:
-
+        # TODO: This method needs to be cleaned up in the future.
         repository_dir = Prompt.ask(
             "Where do you want to install the Dagster project?",
             default="$MELTANO_PROJECT_ROOT/orchestrate",
@@ -77,11 +77,6 @@ class Dagster(ExtensionBase):
             default=True,
         )
 
-        use_software_defined_assets = Confirm.ask(
-            "Do you want to automatically load Software Defined Assets?",
-            default=True,
-        )
-
         dbt_installed = Confirm.ask(
             "Do you have DBT installed?",
             default=True,
@@ -90,7 +85,10 @@ class Dagster(ExtensionBase):
         if dbt_installed:
             dbt_plugin = Prompt.ask(
                 "Which DBT plugin do you have installed?",
-                choices=["dbt-postgres", "dbt-snowflake", "dbt-bigquery", "dbt-redshift"],
+                choices=["postgres", "snowflake", "bigquery", "redshift"],
+            )
+            print(
+                "[blue]Make sure you define the DBT environment variable in the Dagster utility.[/blue]"
             )
         else:
             dbt_plugin = None
@@ -98,7 +96,6 @@ class Dagster(ExtensionBase):
         cookiecutter_config = {
             "project_name": repository_dir.name,
             "install_github_actions": install_github_actions,
-            "use_software_defined_assets": use_software_defined_assets,
             "dbt_plugin": dbt_plugin,
         }
 
@@ -187,4 +184,3 @@ class Dagster(ExtensionBase):
 
 if __name__ == "__main__":
     path = files_dagster_ext.__path__
-    print("ba")

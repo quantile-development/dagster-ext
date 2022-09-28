@@ -15,16 +15,6 @@ plugins:
             path: extract/sample.csv
             keys: [id]
 
-    - name: tap-github
-      variant: singer-io
-      pip_url: tap-github
-      select:
-        - "issues.*"
-      config:
-        repository: quantile-development/dagster-meltano
-        start_date: 2021-01-01
-        access_token: $TAP_GITHUB_ACCESS_TOKEN
-
   loaders:
     - name: target-postgres
       variant: transferwise
@@ -35,10 +25,22 @@ plugins:
         password: postgres
         host: postgres
 
+  transformers:
+    - name: dbt-postgres
+      variant: dbt-labs
+      pip_url: dbt-core~=1.1.0 dbt-postgres~=1.1.0
+      env:
+        DBT_POSTGRES_HOST: postgres
+        DBT_POSTGRES_USER: postgres
+        DBT_POSTGRES_PORT: "5432"
+        DBT_POSTGRES_DBNAME: postgres
+        DBT_POSTGRES_PASSWORD: postgres
+        DBT_POSTGRES_SCHEMA: warehouse
+
   utilities:
     - name: dagster
       namespace: dagster
-      pip_url: -e /workspace dbt-postgres
+      pip_url: -e /workspace dbt-core dbt-postgres
       executable: dagster_invoker
       settings:
         - name: dagster_home
@@ -48,7 +50,15 @@ plugins:
         - name: repository_dir
           env: REPOSITORY_DIR
           value: $MELTANO_PROJECT_ROOT/orchestrate
-          label: The root folder of the dagster project
+          label: The root folder of the Dagster project
+        - name: dbt_project_dir
+          env: DBT_PROJECT_DIR
+          value: $MELTANO_PROJECT_ROOT/transform
+          label: The root folder of the DBT project
+        - name: dbt_profiles_dir
+          env: DBT_PROFILES_DIR
+          value: $MELTANO_PROJECT_ROOT/transform/profiles
+          label: The folder where the DBT profiles are stored
       commands:
         initialize:
           args: initialize
@@ -59,6 +69,13 @@ plugins:
         up:
           args: -f $REPOSITORY_DIR/repository.py
           executable: dagit_invoker
+      env:
+        DBT_POSTGRES_HOST: postgres
+        DBT_POSTGRES_USER: postgres
+        DBT_POSTGRES_PORT: "5432"
+        DBT_POSTGRES_DBNAME: postgres
+        DBT_POSTGRES_PASSWORD: postgres
+        DBT_POSTGRES_SCHEMA: warehouse
       config:
         repository_dir: $MELTANO_PROJECT_ROOT/orchestrate
 jobs:
