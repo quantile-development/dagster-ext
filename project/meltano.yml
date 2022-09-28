@@ -28,7 +28,7 @@ plugins:
   transformers:
     - name: dbt-postgres
       variant: dbt-labs
-      pip_url: dbt-core~=1.1.0 dbt-postgres~=1.1.0
+      pip_url: dbt-core~=1.2.0 dbt-postgres~=1.2.0
       env:
         DBT_POSTGRES_HOST: postgres
         DBT_POSTGRES_USER: postgres
@@ -40,7 +40,7 @@ plugins:
   utilities:
     - name: dagster
       namespace: dagster
-      pip_url: -e /workspace dbt-core dbt-postgres
+      pip_url: -e /workspace dbt-core~=1.2.0 dbt-postgres~=1.2.0
       executable: dagster_invoker
       settings:
         - name: dagster_home
@@ -51,14 +51,6 @@ plugins:
           env: REPOSITORY_DIR
           value: $MELTANO_PROJECT_ROOT/orchestrate
           label: The root folder of the Dagster project
-        - name: dbt_project_dir
-          env: DBT_PROJECT_DIR
-          value: $MELTANO_PROJECT_ROOT/transform
-          label: The root folder of the DBT project
-        - name: dbt_profiles_dir
-          env: DBT_PROFILES_DIR
-          value: $MELTANO_PROJECT_ROOT/transform/profiles
-          label: The folder where the DBT profiles are stored
       commands:
         initialize:
           args: initialize
@@ -78,19 +70,20 @@ plugins:
         DBT_POSTGRES_SCHEMA: warehouse
       config:
         repository_dir: $MELTANO_PROJECT_ROOT/orchestrate
+
 jobs:
-  - name: job-with-schedule
+  - name: ingestion
     tasks:
       - tap-csv target-postgres
-  - name: job-without-schedule
+  - name: end-to-end
     tasks:
-      - tap-csv target-jsonl
-      - tap-csv target-snowflake
+      - tap-csv target-postgres
+      - dbt-postgres:build
 
 schedules:
   - name: schedule
     interval: "@daily"
-    job: job-with-schedule
+    job: end-to-end
 
 environments:
   - name: dev

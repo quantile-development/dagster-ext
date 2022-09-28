@@ -36,6 +36,7 @@ class MeltanoInvoker:
             "MELTANO_CLI_LOG_CONFIG": Path(__file__).parent / "logging.yaml",
             "MELTANO_CLI_LOG_LEVEL": log_level,
             "DBT_USE_COLORS": "false",
+            "NO_COLOR": "1",
             **env,
         }
 
