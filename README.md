@@ -1,5 +1,7 @@
 # Meltano Dagster Extention
 
+[![PyPI version](https://badge.fury.io/py/dagster-ext.svg)](https://badge.fury.io/py/dagster-ext)
+
 Description here
 
 ## Installation
