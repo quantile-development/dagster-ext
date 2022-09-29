@@ -2,9 +2,18 @@
 
 [![PyPI version](https://badge.fury.io/py/dagster-ext.svg)](https://badge.fury.io/py/dagster-ext)
 
-Description here
+This project is still a work in progress. Please create an issue if you find any bugs. 
+
+## Features
+- Load all Meltano jobs as Dagster jobs.
+- Add all correspondig schedules to these jobs.
+- Load all DBT models as Dagster assets.
+- (todo) Load all Singer tap streams as Dagster assets.
+- (todo) Ops to perform all Meltano actions.
+- (todo) Extract Singer metrics from logs and store them using Dagster.
 
 ## Installation
+(You cannot use the `meltano add` yet.)
 
 ```sh
 # Add the dagster-ext to your Meltano project
