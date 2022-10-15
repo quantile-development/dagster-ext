@@ -18,7 +18,11 @@ STDOUT = 1
 
 
 class MeltanoResource(metaclass=Singleton):
-    def __init__(self, project_dir: str = None, meltano_bin: Optional[str] = "meltano"):
+    def __init__(
+        self,
+        project_dir: str = None,
+        meltano_bin: Optional[str] = "meltano",
+    ):
         self.project_dir = project_dir
         self.meltano_bin = meltano_bin
         self.meltano_invoker = MeltanoInvoker(
@@ -51,7 +55,13 @@ class MeltanoResource(metaclass=Singleton):
     @lru_cache
     def meltano_jobs(self) -> List[Job]:
         meltano_job_list = self.meltano_yaml["jobs"]
-        return [Job(meltano_job, self.meltano_invoker) for meltano_job in meltano_job_list]
+        return [
+            Job(
+                meltano_job,
+                self.meltano_invoker,
+            )
+            for meltano_job in meltano_job_list
+        ]
 
     @property
     @lru_cache

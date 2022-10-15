@@ -1,9 +1,7 @@
-from __future__ import annotations
-
 import asyncio
 import json
+import logging
 from functools import lru_cache
-from typing import TYPE_CHECKING
 
 from dagster import (
     In,
@@ -17,70 +15,16 @@ from dagster import (
 )
 
 from dagster_meltano.meltano_invoker import MeltanoInvoker
+from dagster_meltano.ops import meltano_run_op as meltano_run_op_factory
 from dagster_meltano.utils import generate_dagster_name
-
-if TYPE_CHECKING:
-    from dagster_meltano.meltano_resource import MeltanoResource
-
-dagster_logger = get_dagster_logger()
-
-
-async def log_processor(reader: asyncio.streams.StreamReader, log_type: str) -> None:
-    """Log the output of a stream.
-
-    Args:
-        reader: The stream reader to read from.
-    """
-    # TODO: Clean up the logging
-    while True:
-        if reader.at_eof():
-            break
-        data = await reader.readline()
-        log_line_raw = data.decode("utf-8").rstrip()
-
-        if not log_line_raw:
-            continue
-
-        try:
-            log_line = json.loads(log_line_raw)
-
-            if log_line.get("level") == "debug":
-                dagster_logger.debug(log_line.get("event", log_line))
-            else:
-                dagster_logger.info(log_line.get("event", log_line))
-        except json.decoder.JSONDecodeError:
-            dagster_logger.info(log_line_raw)
-
-        await asyncio.sleep(0)
-
-
-@lru_cache
-def task_op_factory(task: str) -> OpDefinition:
-    """
-    This factory is cached to make sure the same tasks can be reused in the
-    same repository.
-    """
-
-    @op(
-        name=generate_dagster_name(task),
-        description=f"Run `{task}` using Meltano.",
-        ins={"after": In(Nothing)},
-        tags={"kind": "meltano"},
-        required_resource_keys={"meltano"},
-    )
-    def dagster_op(context: OpExecutionContext):
-        meltano_resource: MeltanoResource = context.resources.meltano
-        meltano_resource.meltano_invoker.run_and_log(
-            "run",
-            log_processor,
-            task.split(),
-        )
-
-    return dagster_op
 
 
 class Job:
-    def __init__(self, meltano_job: dict, meltano_invoker: MeltanoInvoker) -> None:
+    def __init__(
+        self,
+        meltano_job: dict,
+        meltano_invoker: MeltanoInvoker,
+    ) -> None:
         self.name = meltano_job["job_name"]
         self.tasks = meltano_job["tasks"]
         self.meltano_invoker = meltano_invoker
@@ -88,6 +32,10 @@ class Job:
     @property
     def dagster_name(self) -> str:
         return generate_dagster_name(self.name)
+
+    def task_contains_tap(self, task: str) -> bool:
+        """Check whether the supplied task contains a tap."""
+        return "tap-" in task
 
     @property
     def dagster_job(self) -> JobDefinition:
@@ -100,12 +48,50 @@ class Job:
             resource_defs={"meltano": meltano_resource},
         )
         def dagster_job():
-            meltano_task_done = None
+            op_layers = [[], []]
+            previous_task_contains_tap = None
             for task in self.tasks:
-                meltano_task_op = task_op_factory(task)
-                if meltano_task_done:
-                    meltano_task_done = meltano_task_op(meltano_task_done)
-                else:
-                    meltano_task_done = meltano_task_op()
+                meltano_run_op = meltano_run_op_factory(task)
+                current_task_contains_tap = self.task_contains_tap(task)
+
+                # # If the task does not contain a tap, we generate a new layer
+                # if not self.task_contains_tap(task):
+                #     op_layers.append([])
+
+                if not current_task_contains_tap or not previous_task_contains_tap:
+                    op_layers.append([])
+
+                # if not current_task_contains_tap and previous_task_contains_tap:
+
+                # op_layers.append([])
+
+                # # When we are in the first layer
+                # if len(op_layers) == 1:
+                #     op_layers[-1].append(meltano_run_op())
+                #     continue
+
+                op_layers[-1].append(meltano_run_op(op_layers[-2]))
+                previous_task_contains_tap = current_task_contains_tap
+
+            # logging.warning(op_layers)
+
+            # for op_layer_index, op_layer in enumerate(op_layers)[1:]:
+            #     previous_layer = op_layers[op_layer_index - 1]
+
+            #     for
+            #     [meltano_run_op(previous_layer) for meltano_run_op in op_layer]
+
+            # meltano_run_op()
+
+            # meltano_run = meltano_run_op(command=task)
+
+            # if previous_done:
+            #     previous_done = meltano_run(previous_done)
+            # else:
+            #     previous_done = meltano_run()
+
+            # if self.task_contains_tap(task):
+            #     previous_done.append(previous_done)
+            #     continue
 
         return dagster_job

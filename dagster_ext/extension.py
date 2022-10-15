@@ -73,7 +73,7 @@ class Dagster(ExtensionBase):
         repository_dir = Path(repository_dir)
 
         install_github_actions = Confirm.ask(
-            "Do you want to install Github Actions to deploy to Dagster Cloud Serverless?",
+            "Do you want to install Github Actions to deploy to Dagster Cloud Serverless? (Does not work yet)",
             default=True,
         )
 

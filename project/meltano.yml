@@ -75,6 +75,9 @@ jobs:
   - name: ingestion
     tasks:
       - tap-csv target-postgres
+      - tap-csv target-postgres
+      - dbt-postgres:build
+      - dbt-postgres:test
   - name: end-to-end
     tasks:
       - tap-csv target-postgres

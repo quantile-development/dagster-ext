@@ -22,7 +22,11 @@ def load_jobs_from_meltano_project(
     Returns:
         List[Union[JobDefinition, ScheduleDefinition]]: Returns a list of either Dagster JobDefinitions or ScheduleDefinitions
     """
-    meltano_resource = MeltanoResource(meltano_project_dir)
+    meltano_resource = MeltanoResource(
+        project_dir=meltano_project_dir,
+        meltano_bin="meltano",
+    )
+
     meltano_jobs = meltano_resource.jobs
 
     return list(meltano_jobs)
