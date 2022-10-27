@@ -72,26 +72,29 @@ class Dagster(ExtensionBase):
         repository_dir = os.path.expandvars(repository_dir)
         repository_dir = Path(repository_dir)
 
-        install_github_actions = Confirm.ask(
-            "Do you want to install Github Actions to deploy to Dagster Cloud Serverless? (Does not work yet)",
-            default=True,
-        )
+        # install_github_actions = Confirm.ask(
+        #     "Do you want to install Github Actions to deploy to Dagster Cloud Serverless? (Does not work yet)",
+        #     default=True,
+        # )
 
-        dbt_installed = Confirm.ask(
-            "Do you have DBT installed?",
-            default=True,
-        )
+        # dbt_installed = Confirm.ask(
+        #     "Do you have DBT installed?",
+        #     default=True,
+        # )
 
-        if dbt_installed:
-            dbt_plugin = Prompt.ask(
-                "Which DBT plugin do you have installed?",
-                choices=["postgres", "snowflake", "bigquery", "redshift"],
-            )
-            print(
-                "[blue]Make sure you define the DBT environment variables in the Dagster utility.[/blue]"
-            )
-        else:
-            dbt_plugin = None
+        # if dbt_installed:
+        #     dbt_plugin = Prompt.ask(
+        #         "Which DBT plugin do you have installed?",
+        #         choices=["postgres", "snowflake", "bigquery", "redshift"],
+        #     )
+        #     print(
+        #         "[blue]Make sure you define the DBT environment variables in the Dagster utility.[/blue]"
+        #     )
+        # else:
+        #     dbt_plugin = None
+
+        install_github_actions = True
+        dbt_plugin = None
 
         cookiecutter_config = {
             "project_name": repository_dir.name,

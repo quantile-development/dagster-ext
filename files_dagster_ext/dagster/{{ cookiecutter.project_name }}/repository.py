@@ -2,8 +2,10 @@ import os
 from pathlib import Path
 
 from dagster import repository, with_resources
+
 {% if cookiecutter.dbt_plugin -%}
 from dagster_dbt import dbt_cli_resource
+
 {% endif -%}
 from dagster_meltano import (
     load_assets_from_meltano_project,
@@ -27,7 +29,7 @@ def repository():
         with_resources(
             load_assets_from_meltano_project(
                 meltano_project_dir=MELTANO_PROJECT_DIR,
-                {% if cookiecutter.dbt_plugin -%}
+                {%- if cookiecutter.dbt_plugin -%}
                 dbt_project_dir=str(DBT_PROJECT_DIR),
                 dbt_profiles_dir=str(DBT_PROFILES_DIR),
                 # dbt_target_dir=str(DBT_TARGET_PATH),
@@ -36,7 +38,7 @@ def repository():
             ),
             {
                 "meltano": meltano_resource,
-                {% if cookiecutter.dbt_plugin -%}
+                {%- if cookiecutter.dbt_plugin -%}
                 "dbt": dbt_cli_resource.configured(
                     {
                         "project_dir": str(DBT_PROJECT_DIR),
