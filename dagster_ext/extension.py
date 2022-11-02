@@ -56,7 +56,7 @@ class Dagster(ExtensionBase):
         # TODO: This method needs to be cleaned up in the future.
         repository_dir = Prompt.ask(
             "Where do you want to install the Dagster project?",
-            default="$MELTANO_PROJECT_ROOT/orchestrate",
+            default="$MELTANO_PROJECT_ROOT/orchestrate/dagster",
         )
 
         with spinner as progress:
@@ -111,7 +111,7 @@ class Dagster(ExtensionBase):
         )
 
         print("[green]Successfully initialized your Dagster project![/green]")
-        print("[green]Start Dagit by running `meltano invoke dagster:up`[/green]")
+        print("[green]Start Dagit by running `meltano invoke dagster:start`[/green]")
 
     def invoke(self, invoker: Invoker, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.
@@ -132,11 +132,20 @@ class Dagster(ExtensionBase):
         Returns:
             The extension description
         """
-        # TODO: could we auto-generate all or portions of this from typer instead?
         return models.Describe(
             commands=[
-                models.ExtensionCommand(name="dagster_extension", description="extension commands"),
-                models.InvokerCommand(name="dagster_invoker", description="pass through invoker"),
+                models.ExtensionCommand(
+                    name="dagster_extension",
+                    description="extension commands",
+                ),
+                models.InvokerCommand(
+                    name="dagster_invoker",
+                    description="pass through invoker for dagster",
+                ),
+                models.InvokerCommand(
+                    name="dagit_invoker",
+                    description="pass through invoker for dagit",
+                ),
             ]
         )
 

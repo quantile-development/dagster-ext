@@ -49,7 +49,7 @@ plugins:
           label: The home folder of Dagster
         - name: repository_dir
           env: REPOSITORY_DIR
-          value: $MELTANO_PROJECT_ROOT/orchestrate
+          value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
           label: The root folder of the Dagster project
       commands:
         initialize:
@@ -58,9 +58,13 @@ plugins:
         init:
           args: initialize
           executable: dagster_extension
-        up:
+        start:
           args: -f $REPOSITORY_DIR/repository.py
           executable: dagit_invoker
+        describe:
+          executable: dagster_extension
+          args: describe
+          description: Describe the Dagster Extension.
       env:
         DBT_POSTGRES_HOST: postgres
         DBT_POSTGRES_USER: postgres
@@ -70,7 +74,7 @@ plugins:
         DBT_POSTGRES_SCHEMA: warehouse
 
       config:
-        repository_dir: $MELTANO_PROJECT_ROOT/orchestrate
+        repository_dir: $MELTANO_PROJECT_ROOT/orchestrate/dagster
 jobs:
   - name: ingestion
     tasks:
