@@ -51,6 +51,21 @@ plugins:
           env: REPOSITORY_DIR
           value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
           label: The root folder of the Dagster project
+        - name: cloud_organization
+          env: DAGSTER_CLOUD_ORGANIZATION
+          label: The Dagster Cloud organization you would like to deploy to.
+        - name: cloud_api_token
+          env: DAGSTER_CLOUD_API_TOKEN
+          kind: password
+          label: The api token of your Dagster Cloud environment.
+        - name: cloud_deployment
+          env: DAGSTER_CLOUD_DEPLOYMENT
+          value: prod
+          label: The default deployment to deploy to.
+        - name: cloud_location_name
+          env: DAGSTER_CLOUD_LOCATION_NAME
+          value: meltano
+          label: The name of the Cloud Deployment location.
       commands:
         initialize:
           args: initialize
@@ -62,9 +77,13 @@ plugins:
           args: -f $REPOSITORY_DIR/repository.py
           executable: dagit_invoker
         describe:
-          executable: dagster_extension
           args: describe
           description: Describe the Dagster Extension.
+          executable: dagster_extension
+        deploy:
+          args: serverless deploy -f orchestrate/dagster/repository.py --location-name $DAGSTER_CLOUD_LOCATION_NAME --base-image=prebuild $MELTANO_PROJECT_ROOT
+
+          executable: cloud_invoker
       env:
         DBT_POSTGRES_HOST: postgres
         DBT_POSTGRES_USER: postgres
@@ -72,9 +91,11 @@ plugins:
         DBT_POSTGRES_DBNAME: postgres
         DBT_POSTGRES_PASSWORD: postgres
         DBT_POSTGRES_SCHEMA: warehouse
+        DAGSTER_CLOUD_ORGANIZATION: quantile
 
       config:
         repository_dir: $MELTANO_PROJECT_ROOT/orchestrate/dagster
+        cloud_organization: quantile
 jobs:
   - name: ingestion
     tasks:

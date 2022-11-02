@@ -27,3 +27,14 @@ def pass_through_cli_dagit() -> None:
         structlog.getLogger("dagit_invoker"),
         *sys.argv[1:] if len(sys.argv) > 1 else [],
     )
+
+
+def pass_through_cli_cloud() -> None:
+    """Pass through CLI entry point for Dagster Cloud."""
+    pass_through_logging_config()
+    ext = Dagster()
+    ext.pass_through_invoker(
+        "cloud",
+        structlog.getLogger("cloud_invoker"),
+        *sys.argv[1:] if len(sys.argv) > 1 else [],
+    )

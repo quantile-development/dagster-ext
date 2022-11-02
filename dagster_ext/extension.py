@@ -22,12 +22,6 @@ from rich.prompt import Confirm, Prompt
 
 log = structlog.get_logger()
 
-spinner = Progress(
-    SpinnerColumn(),
-    TextColumn("[progress.description]{task.description}"),
-    transient=True,
-)
-
 
 class Dagster(ExtensionBase):
     """Extension implementing the ExtensionBase interface."""
@@ -37,6 +31,7 @@ class Dagster(ExtensionBase):
         self.invokers = {
             "dagster": Invoker("dagster"),
             "dagit": Invoker("dagit"),
+            "cloud": Invoker("dagster-cloud"),
             "meltano": Invoker("meltano", env={**os.environ, "MELTANO_ENVIRONMENT": ""}),
         }
 
@@ -52,6 +47,23 @@ class Dagster(ExtensionBase):
         """
         return Path(files_dagster_ext.__path__._path[0]) / "dagster"
 
+    def set_meltano_config(self, description: str, config_name: str, config_value: str) -> None:
+        spinner = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,
+        )
+
+        with spinner as progress:
+            progress.add_task(description=description, total=None)
+            self.get_invoker_by_name("meltano").run(
+                "config",
+                self.utility_name,
+                "set",
+                config_name,
+                config_value,
+            )
+
     def initialize(self, force: bool = False) -> None:
         # TODO: This method needs to be cleaned up in the future.
         repository_dir = Prompt.ask(
@@ -59,23 +71,47 @@ class Dagster(ExtensionBase):
             default="$MELTANO_PROJECT_ROOT/orchestrate/dagster",
         )
 
-        with spinner as progress:
-            progress.add_task(description="Setting Dagster repository directory", total=None)
-            self.get_invoker_by_name("meltano").run(
-                "config",
-                self.utility_name,
-                "set",
-                "repository_dir",
-                repository_dir,
-            )
+        self.set_meltano_config(
+            description="Setting Dagster repository directory",
+            config_name="repository_dir",
+            config_value=repository_dir,
+        )
 
         repository_dir = os.path.expandvars(repository_dir)
         repository_dir = Path(repository_dir)
 
-        # install_github_actions = Confirm.ask(
-        #     "Do you want to install Github Actions to deploy to Dagster Cloud Serverless? (Does not work yet)",
-        #     default=True,
-        # )
+        install_github_actions = Confirm.ask(
+            "Do you want to install Github Actions to deploy to Dagster Cloud Serverless?",
+            default=True,
+        )
+
+        if install_github_actions:
+            cloud_organization = Prompt.ask("What is your Dagster Cloud organization name?")
+            self.set_meltano_config(
+                description="Setting Dagster Cloud organization",
+                config_name="cloud_organization",
+                config_value=cloud_organization,
+            )
+
+            cloud_api_token = Prompt.ask(
+                "What is your Dagster Cloud api token?",
+                password=True,
+            )
+            self.set_meltano_config(
+                description="Setting Dagster Cloud organization",
+                config_name="cloud_api_token",
+                config_value=cloud_api_token,
+            )
+
+            cloud_location_name = Prompt.ask(
+                "What is your Dagster Cloud location name?",
+                default="meltano"
+            )
+            self.set_meltano_config(
+                description="Setting Dagster Cloud location name",
+                config_name="cloud_location_name",
+                config_value=cloud_location_name,
+            )
 
         # dbt_installed = Confirm.ask(
         #     "Do you have DBT installed?",
@@ -146,6 +182,10 @@ class Dagster(ExtensionBase):
                     name="dagit_invoker",
                     description="pass through invoker for dagit",
                 ),
+                models.InvokerCommand(
+                    name="cloud_invoker",
+                    description="pass through invoker for dagster cloud",
+                ),
             ]
         )
 
@@ -162,7 +202,7 @@ class Dagster(ExtensionBase):
         encountered.
 
         Args:
-            invoker_name: The name of the invoker, currently "dagster" or "dagit".
+            invoker_name: The name of the invoker, currently "dagster", "dagit" or "cloud".
             logger: The logger to use in the event an exception needs to be logged.
             *command_args: The arguments to pass to the command.
         """
