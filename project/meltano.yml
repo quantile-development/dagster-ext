@@ -61,6 +61,10 @@ plugins:
         start:
           args: -f $REPOSITORY_DIR/repository.py
           executable: dagit_invoker
+        describe:
+          executable: dagster_extension
+          args: describe
+          description: Describe the Dagster Extension.
       env:
         DBT_POSTGRES_HOST: postgres
         DBT_POSTGRES_USER: postgres

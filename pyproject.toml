@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dagster-ext"
-version = "0.0.1a7"
+version = "0.0.1a8"
 description = "`dagster-ext` is a Meltano utility extension."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"

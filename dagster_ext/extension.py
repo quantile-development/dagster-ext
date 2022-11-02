@@ -132,11 +132,20 @@ class Dagster(ExtensionBase):
         Returns:
             The extension description
         """
-        # TODO: could we auto-generate all or portions of this from typer instead?
         return models.Describe(
             commands=[
-                models.ExtensionCommand(name="dagster_extension", description="extension commands"),
-                models.InvokerCommand(name="dagster_invoker", description="pass through invoker"),
+                models.ExtensionCommand(
+                    name="dagster_extension",
+                    description="extension commands",
+                ),
+                models.InvokerCommand(
+                    name="dagster_invoker",
+                    description="pass through invoker for dagster",
+                ),
+                models.InvokerCommand(
+                    name="dagit_invoker",
+                    description="pass through invoker for dagit",
+                ),
             ]
         )
 
