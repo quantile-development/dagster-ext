@@ -111,7 +111,7 @@ class Dagster(ExtensionBase):
         )
 
         print("[green]Successfully initialized your Dagster project![/green]")
-        print("[green]Start Dagit by running `meltano invoke dagster:up`[/green]")
+        print("[green]Start Dagit by running `meltano invoke dagster:start`[/green]")
 
     def invoke(self, invoker: Invoker, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.
