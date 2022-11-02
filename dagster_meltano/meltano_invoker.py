@@ -2,11 +2,14 @@ import asyncio
 import json
 import os
 import subprocess
+from asyncio.subprocess import Process
 from pathlib import Path
 from typing import IO, Any, Callable, List, Optional, Tuple, Union
 
-import structlog
 from dagster import get_dagster_logger
+
+from dagster_meltano.log_processing import LogProcessor
+from dagster_meltano.log_processing.passthrough_processor import PassthroughLogProcessor
 
 # log = structlog.get_logger()
 log = get_dagster_logger()
@@ -84,39 +87,10 @@ class MeltanoInvoker:
             **kwargs,
         )
 
-    @staticmethod
-    async def _log_stdio(reader: asyncio.streams.StreamReader, log_type: str) -> None:
-        """Log the output of a stream.
-        Args:
-            reader: The stream reader to read from.
-        """
-        while True:
-            if reader.at_eof():
-                break
-            data = await reader.readline()
-            log.info(data.decode("utf-8").rstrip())
-            await asyncio.sleep(0)
-
-    @staticmethod
-    async def log_processor_json(reader: asyncio.streams.StreamReader, log_type: str) -> dict:
-        if log_type != "stdout":
-            return
-
-        lines = b""
-
-        while True:
-            if reader.at_eof():
-                break
-
-            line = await reader.readline()
-            lines += line
-
-        return json.loads(lines)
-
     async def exec(
         self,
         sub_command: Union[str, None] = None,
-        log_processor: Optional[Callable] = None,
+        log_processor: Optional[LogProcessor] = PassthroughLogProcessor,
         *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
     ) -> Tuple[asyncio.subprocess.Process, List[any]]:
         popen_args = []
@@ -134,27 +108,26 @@ class MeltanoInvoker:
             env=self.env,
         )
 
-        log_processor_function = log_processor or self._log_stdio
-
-        logs = await asyncio.gather(
-            asyncio.create_task(log_processor_function(process.stderr, log_type="stderr")),
-            asyncio.create_task(log_processor_function(process.stdout, log_type="stdout")),
+        log_results = await asyncio.gather(
+            asyncio.create_task(log_processor(process.stderr, log_type="stderr").process_logs()),
+            asyncio.create_task(log_processor(process.stdout, log_type="stdout").process_logs()),
             return_exceptions=True,
         )
 
-        for log in logs:  # raise first exception if any
-            if isinstance(log, Exception):
-                raise log
+        # Raise first exception if any
+        for log_result in log_results:
+            if isinstance(log_result, Exception):
+                raise log_result
 
         await process.wait()
-        return process, logs
+        return process, log_results
 
     def run_and_log(
         self,
         sub_command: Union[str, None] = None,
-        log_processor: Optional[Callable] = None,
+        log_processor: Optional[LogProcessor] = None,
         *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
-    ) -> None:
+    ) -> Tuple[Any, Any]:
         """Run a subprocess and stream the output to the logger.
 
         Note that output from stdout and stderr IS logged. Best used when you want
@@ -168,6 +141,8 @@ class MeltanoInvoker:
         Raises:
             CalledProcessError: If the subprocess failed.
         """
-        process, logs = asyncio.run(self.exec(sub_command, log_processor, *args))
+        process, log_results = asyncio.run(self.exec(sub_command, log_processor, *args))
         if process.returncode:
             raise subprocess.CalledProcessError(process.returncode, cmd=self.bin, stderr=None)
+
+        return log_results

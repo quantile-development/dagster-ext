@@ -1,19 +1,15 @@
 import asyncio
-import json
-import logging
-import os
-import subprocess
 from functools import lru_cache
 from typing import Dict, List, Optional
 
-from dagster import In, Nothing, get_dagster_logger, job, op, resource
+from dagster import resource
 
 from dagster_meltano.job import Job
+from dagster_meltano.log_processing.json_processor import JsonLogProcessor
 from dagster_meltano.meltano_invoker import MeltanoInvoker
 from dagster_meltano.schedule import Schedule
-from dagster_meltano.utils import Singleton, generate_dagster_name
+from dagster_meltano.utils import Singleton
 
-logger = get_dagster_logger()
 STDOUT = 1
 
 
@@ -31,18 +27,19 @@ class MeltanoResource(metaclass=Singleton):
         )
 
     async def load_json_from_cli(self, command: List[str]) -> dict:
-        _, logs = await self.meltano_invoker.exec(
+        _, log_results = await self.meltano_invoker.exec(
             None,
-            self.meltano_invoker.log_processor_json,
+            JsonLogProcessor,
             command,
         )
-        return logs[STDOUT]
+        return log_results[STDOUT]
 
     async def gather_meltano_yaml_information(self):
         jobs, schedules = await asyncio.gather(
             self.load_json_from_cli(["job", "list", "--format=json"]),
             self.load_json_from_cli(["schedule", "list", "--format=json"]),
         )
+
         return jobs, schedules
 
     @property
