@@ -5,8 +5,12 @@ services:
       dockerfile: vscode.Dockerfile
     tty: true
     volumes:
+      - .env:/root/.env
       - ..:/workspace:cached
       - pip-cache:/root/.cache/pip
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/bin/docker:/usr/bin/docker
+      - /usr/bin/com.docker.cli:/usr/bin/com.docker.cli
     environment:
       MELTANO_PROJECT_ROOT: /workspace/project
 
