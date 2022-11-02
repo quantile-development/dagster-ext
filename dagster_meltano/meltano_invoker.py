@@ -4,7 +4,7 @@ import os
 import subprocess
 from asyncio.subprocess import Process
 from pathlib import Path
-from typing import IO, Any, Callable, List, Optional, Tuple, Union
+from typing import IO, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from dagster import get_dagster_logger
 
@@ -23,7 +23,7 @@ class MeltanoInvoker:
         bin: str = "meltano",
         cwd: str = None,
         log_level: str = "info",
-        env: Optional[dict[str, any]] = {},
+        env: Optional[Dict[str, Any]] = {},
     ) -> None:
         """Minimal invoker for running subprocesses.
 

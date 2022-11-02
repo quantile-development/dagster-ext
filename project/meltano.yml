@@ -82,7 +82,6 @@ plugins:
           executable: dagster_extension
         deploy:
           args: serverless deploy -f orchestrate/dagster/repository.py --location-name $DAGSTER_CLOUD_LOCATION_NAME --base-image=prebuild $MELTANO_PROJECT_ROOT
-
           executable: cloud_invoker
       env:
         DBT_POSTGRES_HOST: postgres
