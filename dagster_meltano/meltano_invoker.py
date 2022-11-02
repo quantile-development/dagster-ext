@@ -45,7 +45,7 @@ class MeltanoInvoker:
 
     def run(
         self,
-        *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
+        *args: Union[str, bytes],
         stdout: Union[None, int, IO] = subprocess.PIPE,
         stderr: Union[None, int, IO] = subprocess.STDOUT,
         text: bool = True,
@@ -91,7 +91,7 @@ class MeltanoInvoker:
         self,
         sub_command: Union[str, None] = None,
         log_processor: Optional[LogProcessor] = PassthroughLogProcessor,
-        *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
+        *args: Union[str, bytes],
     ) -> Tuple[asyncio.subprocess.Process, List[any]]:
         popen_args = []
         if sub_command:
@@ -126,7 +126,7 @@ class MeltanoInvoker:
         self,
         sub_command: Union[str, None] = None,
         log_processor: Optional[LogProcessor] = None,
-        *args: Union[str, bytes, os.PathLike[str], os.PathLike[bytes]],
+        *args: Union[str, bytes],
     ) -> Tuple[Any, Any]:
         """Run a subprocess and stream the output to the logger.
 

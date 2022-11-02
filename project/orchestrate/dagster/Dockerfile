@@ -1,11 +1,9 @@
-FROM python:3.8-slim
+FROM python:3.8
 
 RUN pip install pipx
-
-RUN pipx ensurepath
 
 ENV PATH "$PATH:/root/.local/bin"
 
 RUN pipx install meltano==2.6.0
 
-ENTRYPOINT []
+COPY orchestrate/dagster/dagster_cloud_post_install.sh /opt/dagster/app/dagster_cloud_post_install.sh
