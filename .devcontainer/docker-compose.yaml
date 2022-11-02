@@ -9,8 +9,6 @@ services:
       - pip-cache:/root/.cache/pip
     environment:
       MELTANO_PROJECT_ROOT: /workspace/project
-    env_file:
-      - .env
 
   postgres:
     image: postgres:14

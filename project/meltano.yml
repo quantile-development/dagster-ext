@@ -3,92 +3,92 @@ default_environment: dev
 project_id: meltano-b849cd48-8429-42dd-9ee2-1240ff73438f
 plugins:
   extractors:
-  - name: tap-csv
-    variant: meltanolabs
-    pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
-    config:
-      files:
-      - entity: sample_one
-        path: extract/sample.csv
-        keys: [id]
-      - entity: sample_two
-        path: extract/sample.csv
-        keys: [id]
+    - name: tap-csv
+      variant: meltanolabs
+      pip_url: git+https://github.com/MeltanoLabs/tap-csv.git
+      config:
+        files:
+          - entity: sample_one
+            path: extract/sample.csv
+            keys: [id]
+          - entity: sample_two
+            path: extract/sample.csv
+            keys: [id]
 
   loaders:
-  - name: target-postgres
-    variant: transferwise
-    pip_url: pipelinewise-target-postgres
-    config:
-      dbname: postgres
-      user: postgres
-      password: postgres
-      host: postgres
+    - name: target-postgres
+      variant: transferwise
+      pip_url: pipelinewise-target-postgres
+      config:
+        dbname: postgres
+        user: postgres
+        password: postgres
+        host: postgres
 
   transformers:
-  - name: dbt-postgres
-    variant: dbt-labs
-    pip_url: dbt-core~=1.2.0 dbt-postgres~=1.2.0
-    env:
-      DBT_POSTGRES_HOST: postgres
-      DBT_POSTGRES_USER: postgres
-      DBT_POSTGRES_PORT: '5432'
-      DBT_POSTGRES_DBNAME: postgres
-      DBT_POSTGRES_PASSWORD: postgres
-      DBT_POSTGRES_SCHEMA: warehouse
+    - name: dbt-postgres
+      variant: dbt-labs
+      pip_url: dbt-core~=1.2.0 dbt-postgres~=1.2.0
+      env:
+        DBT_POSTGRES_HOST: postgres
+        DBT_POSTGRES_USER: postgres
+        DBT_POSTGRES_PORT: "5432"
+        DBT_POSTGRES_DBNAME: postgres
+        DBT_POSTGRES_PASSWORD: postgres
+        DBT_POSTGRES_SCHEMA: warehouse
 
   utilities:
-  - name: dagster
-    namespace: dagster
-    pip_url: -e /workspace
-    executable: dagster_invoker
-    settings:
-    - name: dagster_home
-      env: DAGSTER_HOME
-      value: $MELTANO_PROJECT_ROOT/.meltano
-      label: The home folder of Dagster
-    - name: repository_dir
-      env: REPOSITORY_DIR
-      value: $MELTANO_PROJECT_ROOT/orchestrate
-      label: The root folder of the Dagster project
-    commands:
-      initialize:
-        args: initialize
-        executable: dagster_extension
-      init:
-        args: initialize
-        executable: dagster_extension
-      up:
-        args: -f $REPOSITORY_DIR/repository.py
-        executable: dagit_invoker
-    env:
-      DBT_POSTGRES_HOST: postgres
-      DBT_POSTGRES_USER: postgres
-      DBT_POSTGRES_PORT: '5432'
-      DBT_POSTGRES_DBNAME: postgres
-      DBT_POSTGRES_PASSWORD: postgres
-      DBT_POSTGRES_SCHEMA: warehouse
+    - name: dagster
+      namespace: dagster
+      pip_url: -e /workspace
+      executable: dagster_invoker
+      settings:
+        - name: dagster_home
+          env: DAGSTER_HOME
+          value: $MELTANO_PROJECT_ROOT/.meltano
+          label: The home folder of Dagster
+        - name: repository_dir
+          env: REPOSITORY_DIR
+          value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
+          label: The root folder of the Dagster project
+      commands:
+        initialize:
+          args: initialize
+          executable: dagster_extension
+        init:
+          args: initialize
+          executable: dagster_extension
+        start:
+          args: -f $REPOSITORY_DIR/repository.py
+          executable: dagit_invoker
+      env:
+        DBT_POSTGRES_HOST: postgres
+        DBT_POSTGRES_USER: postgres
+        DBT_POSTGRES_PORT: "5432"
+        DBT_POSTGRES_DBNAME: postgres
+        DBT_POSTGRES_PASSWORD: postgres
+        DBT_POSTGRES_SCHEMA: warehouse
 
-    config:
-      repository_dir: $MELTANO_PROJECT_ROOT/orchestrate
+      config:
+        repository_dir: $MELTANO_PROJECT_ROOT/orchestrate/dagster
 jobs:
-- name: ingestion
-  tasks:
-  - tap-csv target-postgres
-  - tap-csv target-postgres
-  - dbt-postgres:build
-  - dbt-postgres:test
-- name: end-to-end
-  tasks:
-  - tap-csv target-postgres
-  - dbt-postgres:build
+  - name: ingestion
+    tasks:
+      - tap-csv target-postgres
+      - tap-csv target-postgres
+      - dbt-postgres:build
+      - dbt-postgres:test
+  - name: end-to-end
+    tasks:
+      - tap-csv target-postgres
+      - dbt-postgres:build
 
 schedules:
-- name: schedule
-  interval: '@daily'
-  job: end-to-end
+  - name: schedule
+    interval: "@daily"
+    job: end-to-end
 
 environments:
-- name: dev
-- name: staging
-- name: prod
+  - name: dev
+  - name: staging
+  - name: prod

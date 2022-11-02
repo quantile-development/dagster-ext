@@ -56,7 +56,7 @@ class Dagster(ExtensionBase):
         # TODO: This method needs to be cleaned up in the future.
         repository_dir = Prompt.ask(
             "Where do you want to install the Dagster project?",
-            default="$MELTANO_PROJECT_ROOT/orchestrate",
+            default="$MELTANO_PROJECT_ROOT/orchestrate/dagster",
         )
 
         with spinner as progress:

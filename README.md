@@ -24,19 +24,19 @@ meltano add utility dagster-ext
 meltano invoke dagster:initialize
 
 # Start Dagit
-meltano invoke dagster:up
+meltano invoke dagster:start
 ```
 
 ## Commands
 
 ```sh
-meltano invoke dagster:initialize (dagster:init)
+meltano invoke dagster:initialize
 ```
 
 Setup a new Dagster project and automatically load jobs and assets from your Meltano project.
 
 ```sh
-meltano invoke dagster:up
+meltano invoke dagster:start
 ```
 
 Start Dagit to serve your local Dagster deployment.
