@@ -45,22 +45,21 @@ def meltano_run_op(command: str) -> OpDefinition:
     )
     def dagster_op(context: OpExecutionContext):
         meltano_resource: MeltanoResource = context.resources.meltano
-        process, log_results = meltano_resource.meltano_invoker.run_and_log(
+        log_results = meltano_resource.meltano_invoker.run_and_log(
             "run",
             MetadataLogProcessor,
             command.split(),
         )
-        dagster_logger.info(process)
-        dagster_logger.info(log_results[STDOUT])
+        # dagster_logger.info(log_results[STDOUT])
 
-        yield AssetMaterialization(
-            asset_key="my_dataset",
-            metadata={
-                "my_text_label": "hello",
-                "dashboard_url": MetadataValue.url("http://mycoolsite.com/my_dashboard"),
-                "num_rows": 0,
-            },
-        )
+        # yield AssetMaterialization(
+        #     asset_key="my_dataset",
+        #     metadata={
+        #         "my_text_label": "hello",
+        #         "dashboard_url": MetadataValue.url("http://mycoolsite.com/my_dashboard"),
+        #         "num_rows": 0,
+        #     },
+        # )
 
     return dagster_op
 
