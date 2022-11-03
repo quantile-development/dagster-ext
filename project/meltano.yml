@@ -45,7 +45,7 @@ plugins:
       settings:
         - name: dagster_home
           env: DAGSTER_HOME
-          value: $MELTANO_PROJECT_ROOT/.meltano
+          value: $MELTANO_PROJECT_ROOT/.meltano/dagster
           label: The home folder of Dagster
         - name: repository_dir
           env: REPOSITORY_DIR
