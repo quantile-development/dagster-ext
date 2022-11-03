@@ -9,16 +9,17 @@ import time
 from pathlib import Path
 from typing import Any
 
-import files_dagster_ext
 import structlog
 import typer
 from cookiecutter.main import cookiecutter
-from meltano.edk import models
-from meltano.edk.extension import ExtensionBase
-from meltano.edk.process import Invoker, log_subprocess_error
 from rich import print
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.prompt import Confirm, Prompt
+
+import files_dagster_ext
+from meltano.edk import models
+from meltano.edk.extension import ExtensionBase
+from meltano.edk.process import Invoker, log_subprocess_error
 
 log = structlog.get_logger()
 
@@ -38,6 +39,10 @@ class Dagster(ExtensionBase):
     @property
     def utility_name(self) -> str:
         return os.getenv("MELTANO_UTILITY_NAME", "dagster")
+
+    @property
+    def dagster_home(self) -> Path:
+        return Path(os.getenv("DAGSTER_HOME"))
 
     @property
     def cookiecutter_template_dir(self) -> str:
@@ -81,7 +86,7 @@ class Dagster(ExtensionBase):
         repository_dir = Path(repository_dir)
 
         install_github_actions = Confirm.ask(
-            "Do you want to install Github Actions to deploy to Dagster Cloud Serverless?",
+            "Do you want to setup Dagster Cloud Serverless?",
             default=True,
         )
 
@@ -104,8 +109,7 @@ class Dagster(ExtensionBase):
             )
 
             cloud_location_name = Prompt.ask(
-                "What is your Dagster Cloud location name?",
-                default="meltano"
+                "What is your Dagster Cloud location name?", default="meltano"
             )
             self.set_meltano_config(
                 description="Setting Dagster Cloud location name",
@@ -191,6 +195,15 @@ class Dagster(ExtensionBase):
 
     def get_invoker_by_name(self, invoker_name: str) -> Invoker:
         return self.invokers[invoker_name]
+
+    def pre_invoke(self, invoke_name: str | None, *invoke_args: Any) -> None:
+        """Called before the extension is invoked.
+
+        Args:
+            invoke_name: The name of the command that will be passed to invoke.
+            *invoke_args: The arguments that will be passed to invoke.
+        """
+        self.dagster_home.mkdir(parents=True, exist_ok=True)
 
     def pass_through_invoker(
         self, invoker_name: str, logger: structlog.BoundLogger, *command_args: Any
