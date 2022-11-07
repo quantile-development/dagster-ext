@@ -117,6 +117,8 @@ class Dagster(ExtensionBase):
                 config_value=cloud_location_name,
             )
 
+            # TODO: Create a dockerignore here
+
         # dbt_installed = Confirm.ask(
         #     "Do you have DBT installed?",
         #     default=True,

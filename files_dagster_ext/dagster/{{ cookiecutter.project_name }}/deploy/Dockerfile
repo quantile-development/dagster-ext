@@ -22,8 +22,5 @@ RUN pip install dagster-ext dagster-cloud
 # Copy the meltano project root to the working dir
 COPY . /opt/dagster/app
 
-# Remove the .meltano folder
-RUN rm -rf .meltano
-
 # Install all Meltano plugins
 RUN meltano install
