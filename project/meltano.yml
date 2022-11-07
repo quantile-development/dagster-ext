@@ -9,10 +9,10 @@ plugins:
       config:
         files:
           - entity: sample_one
-            path: /workspace/project/extract/sample.csv
+            path: extract/sample.csv
             keys: [id]
           - entity: sample_two
-            path: /workspace/project/extract/sample.csv
+            path: extract/sample.csv
             keys: [id]
 
   loaders:
@@ -47,10 +47,6 @@ plugins:
           env: DAGSTER_HOME
           value: $MELTANO_PROJECT_ROOT/.meltano/dagster
           label: The home folder of Dagster
-        - name: repository_dir
-          env: REPOSITORY_DIR
-          value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
-          label: The root folder of the Dagster project
         - name: cloud_organization
           env: DAGSTER_CLOUD_ORGANIZATION
           label: The Dagster Cloud organization you would like to deploy to.
@@ -82,13 +78,12 @@ plugins:
           executable: dagster_extension
         deploy:
           args: |
-            serverless 
-            deploy 
-            -f orchestrate/dagster/repository.py 
-            --location-name $DAGSTER_CLOUD_LOCATION_NAME 
-            --base-image=prebuild 
+            deploy
+            --python-file orchestrate/dagster/repository.py
+            --docker-file orchestrate/dagster/deploy/Dockerfile
+            --location-name $DAGSTER_CLOUD_LOCATION_NAME
             $MELTANO_PROJECT_ROOT
-          executable: cloud_invoker
+          executable: dagster_extension
       env:
         DBT_POSTGRES_HOST: postgres
         DBT_POSTGRES_USER: postgres
@@ -99,9 +94,8 @@ plugins:
         DAGSTER_CLOUD_ORGANIZATION: quantile
 
       config:
-        repository_dir: $MELTANO_PROJECT_ROOT/orchestrate/dagster
         cloud_organization: quantile
-        cloud_location_name: meltano
+        cloud_location_name: dagster-ext
 jobs:
   - name: ingestion
     tasks:

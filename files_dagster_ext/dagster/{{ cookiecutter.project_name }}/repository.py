@@ -23,7 +23,7 @@ meltano_jobs = load_jobs_from_meltano_project(MELTANO_PROJECT_DIR)
 
 
 @repository
-def repository():
+def {{ cookiecutter.repository_name }}():
     return [
         meltano_jobs, 
         with_resources(
