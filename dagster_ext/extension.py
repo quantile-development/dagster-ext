@@ -1,5 +1,6 @@
 """Meltano Dagster extension."""
 from __future__ import annotations
+import ast
 
 import os
 import pkgutil
@@ -7,7 +8,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 import structlog
 import typer
@@ -44,6 +45,13 @@ class Dagster(ExtensionBase):
     @property
     def dagster_home(self) -> Path:
         return Path(os.getenv("DAGSTER_HOME"))
+
+    @property
+    def cloud_env_variables(self) -> List[str]:
+        if not "DAGSTER_CLOUD_ENV_VARIABLES" in os.environ:
+            return []
+
+        return ast.literal_eval(os.environ["DAGSTER_CLOUD_ENV_VARIABLES"])
 
     @property
     def cookiecutter_template_dir(self) -> str:
@@ -155,11 +163,32 @@ class Dagster(ExtensionBase):
         print("[green]Start Dagit by running `meltano invoke dagster:start`[/green]")
         print("[blue]Or deploy by running `meltano invoke dagster:deploy`[/blue]")
 
+    def get_env_value(self, env_variable: str) -> str:
+        try:
+            return os.environ[env_variable]
+        except KeyError:
+            raise Exception(f"Could not find environment variable with the name: {env_variable}")
+
+    def env_flags(self, cloud_env_variables: List[str]) -> List[str]:
+        """Create --env flags for the dagster cloud deploy command. We try
+        to fetch the value from the current environment.
+
+        Args:
+            cloud_env_variables (List[str]): A list of environments values to pass through.
+
+        Returns:
+            List[str]: A list of --env flags.
+        """
+        return [
+            f"--env {env_variable}={self.get_env_value(env_variable)}"
+            for env_variable in cloud_env_variables
+        ]
+
     def deploy(self, root: str, python_file: str, docker_file: str, location_name: str) -> None:
-        # docker build -f orchestrate/dagster/deploy/Dockerfile -t dagster-cloud .
         pre_build_image_name = "dagster-meltano"
         docker_invoker = self.get_invoker_by_name("docker")
         dagster_cloud_invoker = self.get_invoker_by_name("cloud")
+        env_flags = self.env_flags(self.cloud_env_variables)
 
         docker_invoker.run_and_log(
             "build",
@@ -182,6 +211,7 @@ class Dagster(ExtensionBase):
                 location_name,
                 "--base-image",
                 pre_build_image_name,
+                *env_flags,
                 root,
             ],
         )

@@ -96,6 +96,8 @@ plugins:
       config:
         cloud_organization: quantile
         cloud_location_name: dagster-ext
+        cloud_env_variables:
+          - MELTANO_ENVIRONMENT
 jobs:
   - name: ingestion
     tasks:
