@@ -189,16 +189,15 @@ class Dagster(ExtensionBase):
         dagster_cloud_invoker = self.get_invoker_by_name("cloud")
         env_flags = self.env_flags(self.cloud_env_variables)
 
-        docker_invoker.run_and_log(
-            "build",
-            [
-                "-f",
-                docker_file,
-                "-t",
-                pre_build_image_name,
-                root,
-            ],
-        )
+        build_args = [
+            "-f",
+            docker_file,
+            "-t",
+            pre_build_image_name,
+            root,
+        ]
+
+        docker_invoker.run_and_log("build", build_args)
 
         deploy_args = [
             "deploy",
@@ -211,8 +210,6 @@ class Dagster(ExtensionBase):
             *env_flags,
             root,
         ]
-
-        print(deploy_args)
 
         dagster_cloud_invoker.run_and_log("serverless", deploy_args)
 
