@@ -14,17 +14,17 @@ services:
     environment:
       MELTANO_PROJECT_ROOT: /workspace/project
 
-  postgres:
-    image: postgres:14
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-      PGDATA: /data/postgres
-    volumes:
-      - postgres:/data/postgres
-    ports:
-      - 5432:5432
+  # postgres:
+  #   image: postgres:14
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: postgres
+  #     PGDATA: /data/postgres
+  #   volumes:
+  #     - postgres:/data/postgres
+  #   ports:
+  #     - 5432:5432
 
 volumes:
   postgres:

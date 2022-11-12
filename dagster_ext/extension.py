@@ -1,7 +1,7 @@
 """Meltano Dagster extension."""
 from __future__ import annotations
-import ast
 
+import ast
 import os
 import pkgutil
 import subprocess
@@ -179,10 +179,9 @@ class Dagster(ExtensionBase):
         Returns:
             List[str]: A list of --env flags.
         """
-        return [
-            f"--env {env_variable}={self.get_env_value(env_variable)}"
-            for env_variable in cloud_env_variables
-        ]
+        for env_variable in cloud_env_variables:
+            yield "--env"
+            yield f"{env_variable}={self.get_env_value(env_variable)}"
 
     def deploy(self, root: str, python_file: str, docker_file: str, location_name: str) -> None:
         pre_build_image_name = "dagster-meltano"
@@ -201,20 +200,21 @@ class Dagster(ExtensionBase):
             ],
         )
 
-        dagster_cloud_invoker.run_and_log(
-            "serverless",
-            [
-                "deploy",
-                "-f",
-                python_file,
-                "--location-name",
-                location_name,
-                "--base-image",
-                pre_build_image_name,
-                *env_flags,
-                root,
-            ],
-        )
+        deploy_args = [
+            "deploy",
+            "-f",
+            python_file,
+            "--location-name",
+            location_name,
+            "--base-image",
+            pre_build_image_name,
+            *env_flags,
+            root,
+        ]
+
+        print(deploy_args)
+
+        dagster_cloud_invoker.run_and_log("serverless", deploy_args)
 
     def invoke(self, invoker: Invoker, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.
