@@ -181,7 +181,7 @@ class Dagster(ExtensionBase):
         """
         for env_variable in cloud_env_variables:
             yield "--env"
-            yield f"{env_variable}={self.get_env_value(env_variable)}"
+            yield f"{env_variable}='{self.get_env_value(env_variable)}'"
 
     def deploy(self, root: str, python_file: str, docker_file: str, location_name: str) -> None:
         pre_build_image_name = "dagster-meltano"
