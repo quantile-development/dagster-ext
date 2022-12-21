@@ -1,13 +1,14 @@
 """Meltano Dagster extension."""
 from __future__ import annotations
 
+import ast
 import os
 import pkgutil
 import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List
 
 import structlog
 import typer
@@ -33,6 +34,7 @@ class Dagster(ExtensionBase):
             "dagster": Invoker("dagster"),
             "dagit": Invoker("dagit"),
             "cloud": Invoker("dagster-cloud"),
+            "docker": Invoker("docker"),
             "meltano": Invoker("meltano", env={**os.environ, "MELTANO_ENVIRONMENT": ""}),
         }
 
@@ -43,6 +45,13 @@ class Dagster(ExtensionBase):
     @property
     def dagster_home(self) -> Path:
         return Path(os.getenv("DAGSTER_HOME"))
+
+    @property
+    def cloud_env_variables(self) -> List[str]:
+        if not "DAGSTER_CLOUD_ENV_VARIABLES" in os.environ:
+            return []
+
+        return ast.literal_eval(os.environ["DAGSTER_CLOUD_ENV_VARIABLES"])
 
     @property
     def cookiecutter_template_dir(self) -> str:
@@ -70,52 +79,53 @@ class Dagster(ExtensionBase):
             )
 
     def initialize(self, force: bool = False) -> None:
-        # TODO: This method needs to be cleaned up in the future.
-        repository_dir = Prompt.ask(
-            "Where do you want to install the Dagster project?",
-            default="$MELTANO_PROJECT_ROOT/orchestrate/dagster",
-        )
-
-        self.set_meltano_config(
-            description="Setting Dagster repository directory",
-            config_name="repository_dir",
-            config_value=repository_dir,
-        )
-
-        repository_dir = os.path.expandvars(repository_dir)
+        repository_dir = os.path.expandvars("$MELTANO_PROJECT_ROOT/orchestrate/dagster")
         repository_dir = Path(repository_dir)
 
-        # install_github_actions = Confirm.ask(
-        #     "Do you want to setup Dagster Cloud Serverless?",
-        #     default=True,
-        # )
+        repository_name = Prompt.ask(
+            "What would you like your Dagster repository to be called?",
+            default="meltano",
+        )
 
-        # if install_github_actions:
-        #     cloud_organization = Prompt.ask("What is your Dagster Cloud organization name?")
-        #     self.set_meltano_config(
-        #         description="Setting Dagster Cloud organization",
-        #         config_name="cloud_organization",
-        #         config_value=cloud_organization,
-        #     )
+        repository_name = repository_name.replace("-", "_").replace(" ", "-")
 
-        #     cloud_api_token = Prompt.ask(
-        #         "What is your Dagster Cloud api token?",
-        #         password=True,
-        #     )
-        #     self.set_meltano_config(
-        #         description="Setting Dagster Cloud organization",
-        #         config_name="cloud_api_token",
-        #         config_value=cloud_api_token,
-        #     )
+        setup_cloud = Confirm.ask(
+            "Do you want to setup Dagster Cloud Serverless?",
+            default=True,
+        )
 
-        #     cloud_location_name = Prompt.ask(
-        #         "What is your Dagster Cloud location name?", default="meltano"
-        #     )
-        #     self.set_meltano_config(
-        #         description="Setting Dagster Cloud location name",
-        #         config_name="cloud_location_name",
-        #         config_value=cloud_location_name,
-        #     )
+        if setup_cloud:
+            cloud_organization = Prompt.ask(
+                "What is your Dagster Cloud organization name?",
+                default=os.getenv("DAGSTER_CLOUD_ORGANIZATION"),
+            )
+            self.set_meltano_config(
+                description="Setting Dagster Cloud organization",
+                config_name="cloud_organization",
+                config_value=cloud_organization,
+            )
+
+            cloud_api_token = Prompt.ask(
+                "What is your Dagster Cloud api token?",
+                password=True,
+            )
+            self.set_meltano_config(
+                description="Setting Dagster Cloud organization",
+                config_name="cloud_api_token",
+                config_value=cloud_api_token,
+            )
+
+            cloud_location_name = Prompt.ask(
+                "What is your Dagster Cloud location name?",
+                default=os.getenv("DAGSTER_CLOUD_LOCATION_NAME", "meltano"),
+            )
+            self.set_meltano_config(
+                description="Setting Dagster Cloud location name",
+                config_name="cloud_location_name",
+                config_value=cloud_location_name,
+            )
+
+            # TODO: Create a dockerignore here
 
         # dbt_installed = Confirm.ask(
         #     "Do you have DBT installed?",
@@ -133,12 +143,11 @@ class Dagster(ExtensionBase):
         # else:
         #     dbt_plugin = None
 
-        install_github_actions = True
         dbt_plugin = None
 
         cookiecutter_config = {
             "project_name": repository_dir.name,
-            "install_github_actions": install_github_actions,
+            "repository_name": repository_name,
             "dbt_plugin": dbt_plugin,
         }
 
@@ -152,6 +161,57 @@ class Dagster(ExtensionBase):
 
         print("[green]Successfully initialized your Dagster project![/green]")
         print("[green]Start Dagit by running `meltano invoke dagster:start`[/green]")
+        print("[blue]Or deploy by running `meltano invoke dagster:deploy`[/blue]")
+
+    def get_env_value(self, env_variable: str) -> str:
+        try:
+            return os.environ[env_variable]
+        except KeyError:
+            raise Exception(f"Could not find environment variable with the name: {env_variable}")
+
+    def env_flags(self, cloud_env_variables: List[str]) -> List[str]:
+        """Create --env flags for the dagster cloud deploy command. We try
+        to fetch the value from the current environment.
+
+        Args:
+            cloud_env_variables (List[str]): A list of environments values to pass through.
+
+        Returns:
+            List[str]: A list of --env flags.
+        """
+        for env_variable in cloud_env_variables:
+            yield "--env"
+            yield f"{env_variable}='{self.get_env_value(env_variable)}'"
+
+    def deploy(self, root: str, python_file: str, docker_file: str, location_name: str) -> None:
+        pre_build_image_name = "dagster-meltano"
+        docker_invoker = self.get_invoker_by_name("docker")
+        dagster_cloud_invoker = self.get_invoker_by_name("cloud")
+        env_flags = self.env_flags(self.cloud_env_variables)
+
+        build_args = [
+            "-f",
+            docker_file,
+            "-t",
+            pre_build_image_name,
+            root,
+        ]
+
+        docker_invoker.run_and_log("build", build_args)
+
+        deploy_args = [
+            "deploy",
+            "-f",
+            python_file,
+            "--location-name",
+            location_name,
+            "--base-image",
+            pre_build_image_name,
+            *env_flags,
+            root,
+        ]
+
+        dagster_cloud_invoker.run_and_log("serverless", deploy_args)
 
     def invoke(self, invoker: Invoker, command_name: str | None, *command_args: Any) -> None:
         """Invoke the underlying cli, that is being wrapped by this extension.

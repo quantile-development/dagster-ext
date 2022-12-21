@@ -1,5 +1,5 @@
 {
     "project_name": "orchestrate",
-    "install_github_actions": false,
+    "repository_name": "meltano",
     "dbt_plugin": null
 }

@@ -16,7 +16,7 @@ meltano_jobs = load_jobs_from_meltano_project(MELTANO_PROJECT_DIR)
 
 
 @repository
-def repository():
+def meltano():
     return [
         meltano_jobs, 
         with_resources(
