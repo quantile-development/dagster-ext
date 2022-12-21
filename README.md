@@ -40,3 +40,54 @@ meltano invoke dagster:start
 ```
 
 Start Dagit to serve your local Dagster deployment.
+
+## Code Examples
+
+Below are some code examples how to use the `dagster-meltano` package.
+
+### Automatically load all jobs and schedules from your Meltano project.
+
+```python
+from dagster import repository
+
+from dagster_meltano import load_jobs_from_meltano_project
+
+meltano_jobs = load_jobs_from_meltano_project("<path-to-meltano-root>")
+
+@repository
+def repository():
+    return [meltano_jobs]
+```
+
+### Install all Meltano plugins
+
+```python
+from dagster import repository, job
+
+from dagster_meltano import meltano_resource, meltano_install_op
+
+@job(resource_defs={"meltano": meltano_resource})
+def install_job():
+    meltano_install_op()
+
+@repository()
+def repository():
+    return [install_job]
+```
+
+### Create an arbitrary Meltano run command
+
+```python
+from dagster import repository, job
+
+from dagster_meltano import meltano_resource, meltano_run_op
+
+@job(resource_defs={"meltano": meltano_resource})
+def meltano_run_job():
+    tap_done = meltano_run_op("tap-1 target-1")()
+    meltano_run_op("tap-2 target-2")(tap_done)
+
+@repository()
+def repository():
+    return [meltano_run_job]
+```
