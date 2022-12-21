@@ -12,7 +12,6 @@ This project is still a work in progress. Please create an issue if you find any
 - (todo) Load all Singer tap streams as Dagster assets.
 - (todo) Ops to perform all Meltano actions.
 - (todo) Extract Singer metrics from logs and store them using Dagster.
-- (todo) Add more integrations with Dagster Cloud.
 
 ## Installation
 

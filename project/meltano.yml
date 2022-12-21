@@ -62,6 +62,11 @@ plugins:
           env: DAGSTER_CLOUD_LOCATION_NAME
           value: meltano
           label: The name of the Cloud Deployment location.
+        - description: The root folder of the Dagster project.
+          env: REPOSITORY_DIR
+          label: Repository Directory
+          name: repository_dir
+          value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
       commands:
         initialize:
           args: initialize
@@ -92,12 +97,6 @@ plugins:
         DBT_POSTGRES_PASSWORD: postgres
         DBT_POSTGRES_SCHEMA: warehouse
         DAGSTER_CLOUD_ORGANIZATION: quantile
-
-      config:
-        cloud_organization: quantile
-        cloud_location_name: dagster-ext
-        cloud_env_variables:
-          - MELTANO_ENVIRONMENT
 jobs:
   - name: ingestion
     tasks:
@@ -115,6 +114,10 @@ jobs:
 schedules:
   - name: schedule-daily
     interval: "@daily"
+    job: tap-target
+
+  - name: schedule-weekly
+    interval: "@weekly"
     job: tap-target
 
 environments:

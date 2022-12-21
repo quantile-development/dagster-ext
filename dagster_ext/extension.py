@@ -89,43 +89,43 @@ class Dagster(ExtensionBase):
 
         repository_name = repository_name.replace("-", "_").replace(" ", "-")
 
-        setup_cloud = Confirm.ask(
-            "Do you want to setup Dagster Cloud Serverless?",
-            default=True,
-        )
+        # setup_cloud = Confirm.ask(
+        #     "Do you want to setup Dagster Cloud Serverless?",
+        #     default=True,
+        # )
 
-        if setup_cloud:
-            cloud_organization = Prompt.ask(
-                "What is your Dagster Cloud organization name?",
-                default=os.getenv("DAGSTER_CLOUD_ORGANIZATION"),
-            )
-            self.set_meltano_config(
-                description="Setting Dagster Cloud organization",
-                config_name="cloud_organization",
-                config_value=cloud_organization,
-            )
+        # if setup_cloud:
+        #     cloud_organization = Prompt.ask(
+        #         "What is your Dagster Cloud organization name?",
+        #         default=os.getenv("DAGSTER_CLOUD_ORGANIZATION"),
+        #     )
+        #     self.set_meltano_config(
+        #         description="Setting Dagster Cloud organization",
+        #         config_name="cloud_organization",
+        #         config_value=cloud_organization,
+        #     )
 
-            cloud_api_token = Prompt.ask(
-                "What is your Dagster Cloud api token?",
-                password=True,
-            )
-            self.set_meltano_config(
-                description="Setting Dagster Cloud organization",
-                config_name="cloud_api_token",
-                config_value=cloud_api_token,
-            )
+        #     cloud_api_token = Prompt.ask(
+        #         "What is your Dagster Cloud api token?",
+        #         password=True,
+        #     )
+        #     self.set_meltano_config(
+        #         description="Setting Dagster Cloud organization",
+        #         config_name="cloud_api_token",
+        #         config_value=cloud_api_token,
+        #     )
 
-            cloud_location_name = Prompt.ask(
-                "What is your Dagster Cloud location name?",
-                default=os.getenv("DAGSTER_CLOUD_LOCATION_NAME", "meltano"),
-            )
-            self.set_meltano_config(
-                description="Setting Dagster Cloud location name",
-                config_name="cloud_location_name",
-                config_value=cloud_location_name,
-            )
+        #     cloud_location_name = Prompt.ask(
+        #         "What is your Dagster Cloud location name?",
+        #         default=os.getenv("DAGSTER_CLOUD_LOCATION_NAME", "meltano"),
+        #     )
+        #     self.set_meltano_config(
+        #         description="Setting Dagster Cloud location name",
+        #         config_name="cloud_location_name",
+        #         config_value=cloud_location_name,
+        #     )
 
-            # TODO: Create a dockerignore here
+        # TODO: Create a dockerignore here
 
         # dbt_installed = Confirm.ask(
         #     "Do you have DBT installed?",
@@ -161,7 +161,7 @@ class Dagster(ExtensionBase):
 
         print("[green]Successfully initialized your Dagster project![/green]")
         print("[green]Start Dagit by running `meltano invoke dagster:start`[/green]")
-        print("[blue]Or deploy by running `meltano invoke dagster:deploy`[/blue]")
+        # print("[blue]Or deploy by running `meltano invoke dagster:deploy`[/blue]")
 
     def get_env_value(self, env_variable: str) -> str:
         try:
