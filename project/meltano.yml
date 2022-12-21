@@ -113,7 +113,7 @@ jobs:
       - meltano --help
 
 schedules:
-  - name: schedule
+  - name: schedule-daily
     interval: "@daily"
     job: tap-target
 
