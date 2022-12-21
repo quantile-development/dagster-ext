@@ -76,8 +76,8 @@ class MeltanoResource(metaclass=Singleton):
         for meltano_job in self.meltano_jobs:
             yield meltano_job.dagster_job
 
-            if meltano_job.name in self.meltano_job_schedules:
-                yield self.meltano_job_schedules[meltano_job.name].dagster_schedule
+        for meltano_schedule in self.meltano_schedules:
+            yield meltano_schedule.dagster_schedule
 
 
 @resource(description="A resource that corresponds to a Meltano project.")
@@ -89,4 +89,5 @@ def meltano_resource(init_context):
 
 if __name__ == "__main__":
     meltano_resource = MeltanoResource("/workspace/meltano")
-    print(meltano_resource.meltano_yaml)
+    print(list(meltano_resource.jobs))
+    print(meltano_resource.jobs)
