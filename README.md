@@ -17,7 +17,7 @@ This project is still a work in progress. Please create an issue if you find any
 
 ```sh
 # Add the dagster-ext to your Meltano project
-meltano add utility dagster-ext
+meltano add utility dagster
 
 # Initialize your Dagster project
 meltano invoke dagster:initialize
