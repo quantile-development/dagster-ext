@@ -8,8 +8,7 @@
     "ghcr.io/devcontainers-contrib/features/meltano:1": {
       "version": "2.12.0"
     },
-    "ghcr.io/devcontainers-contrib/features/poetry:1": {},
-    "ghcr.io/devcontainers-contrib/features/pylint:1": {}
+    "ghcr.io/devcontainers-contrib/features/poetry:1": {}
   },
   "extensions": [
     "ms-python.vscode-pylance",
