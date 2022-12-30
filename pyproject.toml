@@ -1,12 +1,11 @@
 [tool.poetry]
 name = "dagster-ext"
-version = "0.0.1a11"
+version = "0.0.1"
 description = "`dagster-ext` is a Meltano utility extension."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"
 packages = [
     { include = "dagster_ext" },
-    { include = "dagster_meltano" },
     { include = "files_dagster_ext" },
     { include = "meltano" }
 ]
@@ -23,6 +22,7 @@ dagster = ">=1.0"
 dagster-dbt = ">=0.16"
 cookiecutter = "^2.1.1"
 rich = "^12.5.1"
+dagster-meltano = ">=1.0.0"
 # Dependencies from Meltano EDK, remove when dependency fixed
 structlog = "^21.2.0"
 PyYAML = "^6.0.0"
