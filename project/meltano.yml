@@ -25,6 +25,10 @@ plugins:
         password: postgres
         host: postgres
 
+    - name: target-jsonl
+      variant: andyh1203
+      pip_url: target-jsonl
+
   transformers:
     - name: dbt-postgres
       variant: dbt-labs
@@ -62,11 +66,11 @@ plugins:
           env: DAGSTER_CLOUD_LOCATION_NAME
           value: meltano
           label: The name of the Cloud Deployment location.
-        - description: The root folder of the Dagster project.
+        - name: repository_dir
           env: REPOSITORY_DIR
-          label: Repository Directory
-          name: repository_dir
           value: $MELTANO_PROJECT_ROOT/orchestrate/dagster
+          label: Repository Directory
+          description: The root folder of the Dagster project.
       commands:
         initialize:
           args: initialize

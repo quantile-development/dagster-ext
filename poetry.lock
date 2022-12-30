@@ -330,43 +330,6 @@ mypy = ["mypy (==0.950)", "types-PyYAML", "types-backports", "types-certifi", "t
 test = ["astroid", "buildkite-test-collector", "coverage (==5.3)", "docker", "grpcio-tools (>=1.32.0,<1.44.0)", "mock (==3.0.5)", "objgraph", "protobuf (==3.13.0)", "pylint (==2.13.7)", "pytest (==7.0.1)", "pytest-cov (==2.10.1)", "pytest-dependency (==0.5.1)", "pytest-mock (==3.3.1)", "pytest-rerunfailures (==10.0)", "pytest-runner (==5.2)", "pytest-xdist (==2.1.0)", "responses (>=0.10.0,<0.11.0)", "snapshottest (==0.6.0)", "tox (==3.25.0)", "yamllint"]
 
 [[package]]
-name = "dagster-cloud"
-version = "1.0.15"
-description = ""
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-dagster = "1.0.15"
-dagster-cloud-cli = "1.0.15"
-questionary = "*"
-requests = "*"
-typer = {version = "*", extras = ["all"]}
-
-[package.extras]
-docker = ["dagster-docker (==0.16.15)", "docker"]
-ecs = ["boto3", "dagster-aws (==0.16.15)"]
-kubernetes = ["dagster-k8s (==0.16.15)", "kubernetes"]
-sandbox = ["supervisor"]
-tests = ["black", "dagster-k8s (==0.16.15)", "docker", "httpretty", "isort", "kubernetes", "moto", "mypy", "paramiko", "pylint", "pytest", "types-PyYAML", "types-requests"]
-
-[[package]]
-name = "dagster-cloud-cli"
-version = "1.0.15"
-description = ""
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-packaging = ">=20.9"
-PyYAML = ">=5.1"
-questionary = "*"
-requests = "*"
-typer = {version = "*", extras = ["all"]}
-
-[[package]]
 name = "dagster-dbt"
 version = "0.16.15"
 description = "A Dagster integration for dbt"
@@ -917,17 +880,6 @@ six = "*"
 test = ["coveralls", "futures", "mock", "pytest (>=2.7.3)", "pytest-benchmark", "pytest-cov"]
 
 [[package]]
-name = "prompt-toolkit"
-version = "3.0.31"
-description = "Library for building powerful interactive command lines in Python"
-category = "main"
-optional = false
-python-versions = ">=3.6.2"
-
-[package.dependencies]
-wcwidth = "*"
-
-[[package]]
 name = "protobuf"
 version = "3.20.2"
 description = "Protocol Buffers"
@@ -1131,20 +1083,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "questionary"
-version = "1.10.0"
-description = "Python library to build pretty command line user prompts ⭐️"
-category = "main"
-optional = false
-python-versions = ">=3.6,<4.0"
-
-[package.dependencies]
-prompt_toolkit = ">=2.0,<4.0"
-
-[package.extras]
-docs = ["Sphinx (>=3.3,<4.0)", "sphinx-autobuild (>=2020.9.1,<2021.0.0)", "sphinx-autodoc-typehints (>=1.11.1,<2.0.0)", "sphinx-copybutton (>=0.3.1,<0.4.0)", "sphinx-rtd-theme (>=0.5.0,<0.6.0)"]
-
-[[package]]
 name = "requests"
 version = "2.28.1"
 description = "Python HTTP for Humans."
@@ -1198,14 +1136,6 @@ python-versions = ">=3.7"
 docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "rst.linker (>=1.9)", "sphinx", "sphinx-favicon", "sphinx-hoverxref (<2)", "sphinx-inline-tabs", "sphinx-notfound-page (==0.8.3)", "sphinx-reredirects", "sphinxcontrib-towncrier"]
 testing = ["build[virtualenv]", "filelock (>=3.4.0)", "flake8 (<5)", "flake8-2020", "ini2toml[lite] (>=0.9)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "mock", "pip (>=19.1)", "pip-run (>=8.8)", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)", "pytest-perf", "pytest-xdist", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel"]
 testing-integration = ["build[virtualenv]", "filelock (>=3.4.0)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.2.0)", "pytest", "pytest-enabler", "pytest-xdist", "tomli", "virtualenv (>=13.0.0)", "wheel"]
-
-[[package]]
-name = "shellingham"
-version = "1.5.0"
-description = "Tool to Detect Surrounding Shell"
-category = "main"
-optional = false
-python-versions = ">=3.4"
 
 [[package]]
 name = "six"
@@ -1361,9 +1291,6 @@ python-versions = ">=3.6"
 
 [package.dependencies]
 click = ">=7.1.1,<9.0.0"
-colorama = {version = ">=0.4.3,<0.5.0", optional = true, markers = "extra == \"all\""}
-rich = {version = ">=10.11.0,<13.0.0", optional = true, markers = "extra == \"all\""}
-shellingham = {version = ">=1.3.0,<2.0.0", optional = true, markers = "extra == \"all\""}
 
 [package.extras]
 all = ["colorama (>=0.4.3,<0.5.0)", "rich (>=10.11.0,<13.0.0)", "shellingham (>=1.3.0,<2.0.0)"]
@@ -1458,14 +1385,6 @@ python-versions = ">=3.7"
 anyio = ">=3.0.0,<4"
 
 [[package]]
-name = "wcwidth"
-version = "0.2.5"
-description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "websockets"
 version = "10.3"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
@@ -1495,7 +1414,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "<3.11,>=3.8"
-content-hash = "92426f4001f844694b968a49ebdc290a97c62e56c5378217d40845517ab2e0e8"
+content-hash = "edc08c391c7c0e44a38d26241646cc7938afd6bb08638f34f52b2197903cfe3d"
 
 [metadata.files]
 agate = [
@@ -1672,14 +1591,6 @@ dagit = [
 dagster = [
     {file = "dagster-1.0.15-py3-none-any.whl", hash = "sha256:6faee31007ce6dbfdee3770608be4b13a69584f636d91a7d482ec10d83b8fba2"},
     {file = "dagster-1.0.15.tar.gz", hash = "sha256:933812f0f4c4811a2a696d399b5cc6c7fba70f270f2b311af3f377e24826e573"},
-]
-dagster-cloud = [
-    {file = "dagster_cloud-1.0.15-py3-none-any.whl", hash = "sha256:76da62558b1ce02255cbf5bdad620513fa923091e3f8f6e31df0ed521e8d39fc"},
-    {file = "dagster_cloud-1.0.15.tar.gz", hash = "sha256:d5825c4273fa3135b6b58fcc1ce56f612a9e56e671d7b20ea3d5cb0ae1033aa1"},
-]
-dagster-cloud-cli = [
-    {file = "dagster_cloud_cli-1.0.15-py3-none-any.whl", hash = "sha256:40f35d697b18ec4b4dca9c91f13dc38ee958b9226382370727748941f4ef3123"},
-    {file = "dagster_cloud_cli-1.0.15.tar.gz", hash = "sha256:388ea122e59a21162260a73bae22d5251a0729786ed76424a6d8385961cf393d"},
 ]
 dagster-dbt = [
     {file = "dagster-dbt-0.16.15.tar.gz", hash = "sha256:45eedcd0de1cfb7d4aa93bcd9451e068cf9a7652f89b27ee261f907af827c882"},
@@ -2181,10 +2092,6 @@ platformdirs = [
 promise = [
     {file = "promise-2.3.tar.gz", hash = "sha256:dfd18337c523ba4b6a58801c164c1904a9d4d1b1747c7d5dbf45b693a49d93d0"},
 ]
-prompt-toolkit = [
-    {file = "prompt_toolkit-3.0.31-py3-none-any.whl", hash = "sha256:9696f386133df0fc8ca5af4895afe5d78f5fcfe5258111c2a79a1c3e41ffa96d"},
-    {file = "prompt_toolkit-3.0.31.tar.gz", hash = "sha256:9ada952c9d1787f52ff6d5f3484d0b4df8952787c087edf6a1f7c2cb1ea88148"},
-]
 protobuf = [
     {file = "protobuf-3.20.2-cp310-cp310-manylinux2014_aarch64.whl", hash = "sha256:09e25909c4297d71d97612f04f41cea8fa8510096864f2835ad2f3b3df5a5559"},
     {file = "protobuf-3.20.2-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:e8fbc522303e09036c752a0afcc5c0603e917222d8bedc02813fd73b4b4ed804"},
@@ -2419,10 +2326,6 @@ PyYAML = [
     {file = "PyYAML-6.0-cp39-cp39-win_amd64.whl", hash = "sha256:b3d267842bf12586ba6c734f89d1f5b871df0273157918b0ccefa29deb05c21c"},
     {file = "PyYAML-6.0.tar.gz", hash = "sha256:68fb519c14306fec9720a2a5b45bc9f0c8d1b9c72adf45c37baedfcd949c35a2"},
 ]
-questionary = [
-    {file = "questionary-1.10.0-py3-none-any.whl", hash = "sha256:fecfcc8cca110fda9d561cb83f1e97ecbb93c613ff857f655818839dac74ce90"},
-    {file = "questionary-1.10.0.tar.gz", hash = "sha256:600d3aefecce26d48d97eee936fdb66e4bc27f934c3ab6dd1e292c4f43946d90"},
-]
 requests = [
     {file = "requests-2.28.1-py3-none-any.whl", hash = "sha256:8fefa2a1a1365bf5520aac41836fbee479da67864514bdb821f31ce07ce65349"},
     {file = "requests-2.28.1.tar.gz", hash = "sha256:7c5599b102feddaa661c826c56ab4fee28bfd17f5abca1ebbe3e7f19d7c97983"},
@@ -2438,10 +2341,6 @@ Rx = [
 setuptools = [
     {file = "setuptools-65.4.0-py3-none-any.whl", hash = "sha256:c2d2709550f15aab6c9110196ea312f468f41cd546bceb24127a1be6fdcaeeb1"},
     {file = "setuptools-65.4.0.tar.gz", hash = "sha256:a8f6e213b4b0661f590ccf40de95d28a177cd747d098624ad3f69c40287297e9"},
-]
-shellingham = [
-    {file = "shellingham-1.5.0-py2.py3-none-any.whl", hash = "sha256:a8f02ba61b69baaa13facdba62908ca8690a94b8119b69f5ec5873ea85f7391b"},
-    {file = "shellingham-1.5.0.tar.gz", hash = "sha256:72fb7f5c63103ca2cb91b23dee0c71fe8ad6fbfd46418ef17dbe40db51592dad"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
@@ -2628,10 +2527,6 @@ watchfiles = [
     {file = "watchfiles-0.17.0-pp39-pypy39_pp73-manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:6a3d6c699f3ce238dfa90bcef501f331a69b0d9b076f14459ed8eab26ba2f4cf"},
     {file = "watchfiles-0.17.0-pp39-pypy39_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:a7f4271af86569bdbf131dd5c7c121c45d0ed194f3c88b88326e48a3b6a2db12"},
     {file = "watchfiles-0.17.0.tar.gz", hash = "sha256:ae7c57ef920589a40270d5ef3216d693f4e6f8864d8fc8b6cb7885ca98ad2a61"},
-]
-wcwidth = [
-    {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},
-    {file = "wcwidth-0.2.5.tar.gz", hash = "sha256:c4d647b99872929fdb7bdcaa4fbe7f01413ed3d98077df798530e5b04f116c83"},
 ]
 websockets = [
     {file = "websockets-10.3-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:661f641b44ed315556a2fa630239adfd77bd1b11cb0b9d96ed8ad90b0b1e4978"},
