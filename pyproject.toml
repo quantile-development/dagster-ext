@@ -5,6 +5,7 @@ description = "`dagster-ext` is a Meltano utility extension."
 authors = ["Jules Huisman"]
 license = "Apache 2.0"
 readme = "README.md"
+homepage = "https://github.com/quantile-development/dagster-ext"
 packages = [
     { include = "dagster_ext" },
     { include = "files_dagster_ext" },
@@ -39,9 +40,6 @@ pylint = "^2.15.3"
 [build-system]
 requires = ["poetry-core>=1.0.8"]
 build-backend = "poetry.core.masonry.api"
-
-[project.urls]
-Homepage = "https://github.com/quantile-development/dagster-ext"
 
 [tool.poetry.scripts]
 dagster_extension = 'dagster_ext.main:app'
